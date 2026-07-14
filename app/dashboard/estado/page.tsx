@@ -24,8 +24,9 @@ import {
   Info,
   CheckCircle,
   AlertTriangle,
-  User,
-  Sliders
+  FileText,
+  Sliders,
+  SlidersHorizontal
 } from 'lucide-react'
 
 export default function EstadoPage() {
@@ -41,6 +42,9 @@ export default function EstadoPage() {
 
   // Calendar interactive state
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth())
+
+  // SS Quarterly deviation selection (-25%, 0, +25%)
+  const [ssDeviation, setSsDeviation] = useState<number>(0)
 
   const loadData = useCallback(async () => {
     if (DEMO_MODE) {
@@ -120,9 +124,16 @@ export default function EstadoPage() {
   const totalVat = incoming.reduce((sum, inv) => sum + Number(inv.vat_amount), 0)
   const totalWithholding = incoming.reduce((sum, inv) => sum + Number(inv.withholding_amount), 0)
 
-  // Social Security: 21.4% rate over 70% of average quarterly base income
-  const ssBaseTributavel = (totalBaseIncome / 2) * 0.7
-  const ssMonthlyContribution = ssBaseTributavel > 0 ? (ssBaseTributavel * 0.214) / 3 : 0
+  // Social Security math
+  // Quarterly base average (simplified for visual representation)
+  const ssRendimentoTrimestre = totalBaseIncome / 2
+  const ssBaseTributavelTrimestre = ssRendimentoTrimestre * 0.7
+  const ssMonthlyBaseBase = ssBaseTributavelTrimestre > 0 ? (ssBaseTributavelTrimestre * 0.214) / 3 : 0
+  
+  // Apply contribution deviation (-25%, 0, +25%)
+  const ssMonthlyContribution = ssMonthlyBaseBase * (1 + ssDeviation)
+
+  // VAT calculations
   const monthlyVat = totalVat > 0 ? totalVat / 3 : 0
 
   // Run Progressive IRS calculation engine
@@ -134,7 +145,6 @@ export default function EstadoPage() {
     regiao
   })
 
-  // Expenses justification threshold rules (Simplified Regime: 15% minimum)
   const expensesNeeded = totalBaseIncome * 0.15
   const expensesJustifiedDiff = totalExpenses - expensesNeeded
 
@@ -150,7 +160,7 @@ export default function EstadoPage() {
     {
       label: 'Segurança Social (Mês)',
       value: ssMonthlyContribution,
-      description: 'Contribuição calculada a 21.4% sobre 70% das vendas',
+      description: 'Contribuição mensal ajustada pelo desvio selecionado',
       icon: TrendingUp,
       color: 'text-emerald-600',
       bg: 'bg-emerald-50',
@@ -167,12 +177,10 @@ export default function EstadoPage() {
 
   const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 
-  // Month select descriptions for interactive calendar
   const getMonthPaymentDetails = (mIndex: number) => {
     const isQuarterVat = [1, 4, 7, 10].includes(mIndex) // Feb, May, Aug, Nov
     const details = []
     
-    // Social Security is due every month by the 20th
     details.push({
       title: 'Segurança Social',
       due: `Dia 20 de ${months[mIndex]}`,
@@ -189,7 +197,7 @@ export default function EstadoPage() {
       })
     }
 
-    if (mIndex === 3) { // April
+    if (mIndex === 3) {
       details.push({
         title: 'Declaração Anual de IRS (Modelo 3)',
         due: 'Entre 1 de Abril e 30 de Junho',
@@ -206,7 +214,7 @@ export default function EstadoPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Obrigações Fiscais & Contabilidade</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-sans">Obrigações Fiscais & Contabilidade</h1>
           <p className="text-gray-500 text-sm mt-1">
             Gestão do seu perfil de impostos e simulações progressivas de IRS
           </p>
@@ -272,7 +280,6 @@ export default function EstadoPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          {/* Trabalho Dependente Toggle */}
           <div className="space-y-2 flex flex-col justify-end">
             <div className="flex items-center gap-2 mb-2">
               <input
@@ -288,7 +295,6 @@ export default function EstadoPage() {
             </div>
           </div>
 
-          {/* Rendimento Trabalho Dependente */}
           {trabalhoDependente && (
             <div className="space-y-2 md:col-span-2">
               <Label className="text-gray-700 font-medium">Salário Anual Bruto (Conta de Outrem - Cat A)</Label>
@@ -309,7 +315,7 @@ export default function EstadoPage() {
         <div className="flex justify-end mt-6">
           <Button 
             onClick={handleSaveProfile}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl h-10 px-6 shadow-md shadow-emerald-500/10"
+            className="bg-[#4adeb5] hover:bg-[#39c79f] text-white font-semibold rounded-xl h-10 px-6 shadow-md shadow-[#4adeb5]/10"
           >
             Gravar Dados do Perfil
           </Button>
@@ -348,7 +354,7 @@ export default function EstadoPage() {
 
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Math Calculation Table */}
+            {/* Calculation Table */}
             <div className="space-y-4">
               <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">Cálculo Progressivo de IRS</h3>
               
@@ -435,6 +441,78 @@ export default function EstadoPage() {
         </CardContent>
       </Card>
 
+      {/* Safety Social Quarterly Declaration Simulator */}
+      <Card className="bg-white border-gray-200 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-150 flex items-center gap-2">
+          <FileText className="w-5 h-5 text-emerald-500" />
+          <h2 className="text-lg font-bold text-gray-900">Simulador de Declaração Trimestral (Segurança Social Direta)</h2>
+        </div>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-1 space-y-4">
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Ajuste de Esforço Fiscal</h3>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                Pode optar legalmente por desviar a sua contribuição mensal calculada em **-25%** ou **+25%** para se ajustar aos seus fluxos de tesouraria.
+              </p>
+              
+              <div className="space-y-2 pt-2">
+                <Label className="text-gray-700 font-semibold text-xs">Selecione o Desvio de Contribuição:</Label>
+                <div className="flex gap-2">
+                  <button 
+                    type="button" 
+                    onClick={() => setSsDeviation(-0.25)}
+                    className={`flex-1 h-9 rounded-lg text-xs font-bold border transition-all ${ssDeviation === -0.25 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-white text-gray-505 border-gray-200'}`}
+                  >
+                    -25%
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setSsDeviation(0)}
+                    className={`flex-1 h-9 rounded-lg text-xs font-bold border transition-all ${ssDeviation === 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-white text-gray-505 border-gray-200'}`}
+                  >
+                    Base (0%)
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setSsDeviation(0.25)}
+                    className={`flex-1 h-9 rounded-lg text-xs font-bold border transition-all ${ssDeviation === 0.25 ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-white text-gray-505 border-gray-200'}`}
+                  >
+                    +25%
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-2 bg-gray-50 rounded-2xl p-6 border border-gray-200">
+              <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider mb-4 flex items-center gap-1">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-500" />
+                Valores para introduzir na Segurança Social Direta
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-white p-4 rounded-xl border border-gray-150 text-center">
+                  <span className="text-[10px] text-gray-400 font-bold block mb-1">Rendimento do Trimestre</span>
+                  <span className="text-lg font-bold text-gray-900 font-mono">€{formatCurrency(ssRendimentoTrimestre)}</span>
+                </div>
+                <div className="bg-white p-4 rounded-xl border border-gray-150 text-center">
+                  <span className="text-[10px] text-gray-400 font-bold block mb-1">Base de Incidência (70%)</span>
+                  <span className="text-lg font-bold text-gray-900 font-mono">€{formatCurrency(ssBaseTributavelTrimestre)}</span>
+                </div>
+                <div className="bg-white p-4 rounded-xl border border-gray-150 text-center">
+                  <span className="text-[10px] text-gray-400 font-bold block mb-1">Pagamento Mensal Final</span>
+                  <span className="text-lg font-extrabold text-emerald-600 font-mono">€{formatCurrency(ssMonthlyContribution)}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 bg-emerald-50 text-emerald-800 p-3 rounded-xl text-[10px] flex items-center gap-1.5 leading-relaxed">
+                <Info className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>O valor de **€{formatCurrency(ssMonthlyContribution)}** é devido mensalmente nos 3 meses seguintes ao trimestre declarativo.</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Previsão de Pagamentos Fiscais (Interactive Months Calendar) */}
       <Card className="bg-white border-gray-200 shadow-sm">
         <CardContent className="p-6 space-y-6">
@@ -443,7 +521,6 @@ export default function EstadoPage() {
             <span className="text-xs text-gray-400 font-medium">Selecione o mês para ver os detalhes</span>
           </div>
 
-          {/* Interactive Month Switcher Grid */}
           <div className="grid grid-cols-4 md:grid-cols-12 gap-2">
             {months.map((month, i) => {
               const isSelected = selectedMonth === i
@@ -455,14 +532,14 @@ export default function EstadoPage() {
                   onClick={() => setSelectedMonth(i)}
                   className={`text-center p-3 rounded-xl transition-all font-semibold text-xs border ${
                     isSelected
-                      ? 'bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20'
+                      ? 'bg-[#4adeb5] text-white border-[#4adeb5] shadow-md shadow-[#4adeb5]/20'
                       : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
                   }`}
                 >
                   <p>{month}</p>
                   {hasQuarterVat && (
                     <div className={`w-1.5 h-1.5 rounded-full mx-auto mt-1 ${
-                      isSelected ? 'bg-white' : 'bg-emerald-500'
+                      isSelected ? 'bg-white' : 'bg-[#4adeb5]'
                     }`} />
                   )}
                 </button>
@@ -470,7 +547,6 @@ export default function EstadoPage() {
             })}
           </div>
 
-          {/* Detailed monthly preview information */}
           <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 space-y-4">
             <h3 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
               <Calendar className="w-4 h-4 text-emerald-500" />

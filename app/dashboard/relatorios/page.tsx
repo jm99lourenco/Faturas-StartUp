@@ -13,7 +13,8 @@ import {
   TrendingUp, 
   FileSpreadsheet, 
   Briefcase,
-  HelpCircle
+  HelpCircle,
+  Percent
 } from 'lucide-react'
 
 export default function RelatoriosPage() {
@@ -99,7 +100,7 @@ export default function RelatoriosPage() {
           <Button variant="outline" className="border-gray-300 text-gray-700 rounded-xl h-10 gap-2 font-semibold">
             <FileSpreadsheet className="w-4 h-4" /> Exportar CSV
           </Button>
-          <Button className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-10 gap-2 shadow-md shadow-emerald-500/10 font-semibold">
+          <Button className="bg-[#4adeb5] hover:bg-[#39c79f] text-white rounded-xl h-10 gap-2 shadow-md shadow-[#4adeb5]/10 font-semibold">
             <Download className="w-4 h-4" /> Descarregar PDF
           </Button>
         </div>
@@ -114,11 +115,11 @@ export default function RelatoriosPage() {
           </div>
           <div className="flex items-center gap-4 text-xs font-semibold">
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-1.5 rounded bg-emerald-500" />
+              <div className="w-3 h-1.5 rounded bg-[#4adeb5]" />
               <span className="text-gray-600">Rendimento Bruto</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-1.5 rounded bg-emerald-300" />
+              <div className="w-3 h-1.5 rounded bg-[#98ffd7]" />
               <span className="text-gray-600">O Teu Dinheiro (Líquido)</span>
             </div>
           </div>
@@ -143,7 +144,7 @@ export default function RelatoriosPage() {
             <path
               d="M50,180 L165,160 L280,140 L395,110 L510,95 L625,70 L740,45"
               fill="none"
-              stroke="#10b981"
+              stroke="#4adeb5"
               strokeWidth="3.5"
               strokeLinecap="round"
             />
@@ -151,14 +152,14 @@ export default function RelatoriosPage() {
             <path
               d="M50,195 L165,180 L280,165 L395,140 L510,120 L625,95 L740,75"
               fill="none"
-              stroke="#6ee7b7"
+              stroke="#a8ffd8"
               strokeWidth="3.5"
               strokeLinecap="round"
             />
 
             {/* Points */}
-            <circle cx="740" cy="45" r="5" fill="#10b981" />
-            <circle cx="740" cy="75" r="5" fill="#6ee7b7" />
+            <circle cx="740" cy="45" r="5" fill="#4adeb5" />
+            <circle cx="740" cy="75" r="5" fill="#a8ffd8" />
           </svg>
         </div>
       </Card>
@@ -166,42 +167,82 @@ export default function RelatoriosPage() {
       {/* Two Column Layout: Client Distribution & Key Metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
-        {/* Left Column: Client Share */}
+        {/* Left Column: Client Share (Donut / Pie Chart included) */}
         <Card className="bg-white border-gray-200 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Briefcase className="w-5 h-5 text-emerald-500" />
               <h2 className="text-lg font-bold text-gray-900">Distribuição por Cliente</h2>
             </div>
-            {/* Tooltip to explain Client Distribution */}
             <div className="group relative cursor-help">
               <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors" />
               <div className="absolute right-0 top-6 hidden group-hover:block bg-slate-900 text-white text-[10px] p-3 rounded-xl shadow-xl w-60 z-20 leading-relaxed">
-                Mostra a percentagem de rendimento que provém de cada cliente. Útil para identificar o seu grau de dependência comercial (risco de concentração).
+                Demonstra a dependência comercial e concentração de faturação por cliente. Menor dependência de um só cliente reduz o risco financeiro.
               </div>
             </div>
           </div>
-          
-          <div className="space-y-4">
-            {clientData.map((client, i) => (
-              <div key={client.name} className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-semibold text-gray-800">{client.name}</span>
-                  <span className="font-mono text-gray-600 font-medium">
-                    €{formatCurrency(client.value)} ({client.percentage}%)
-                  </span>
-                </div>
-                <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-emerald-500 rounded-full transition-all duration-1000"
-                    style={{ width: `${client.percentage}%` }}
-                  />
-                </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+            {/* SVG Donut Chart */}
+            <div className="relative flex items-center justify-center">
+              <svg width="160" height="160" viewBox="0 0 36 36" className="w-40 h-40">
+                <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f1f5f9" strokeWidth="3" />
+                {/* 35% Segment - Client 1 (emerald-400) */}
+                <circle 
+                  cx="18" cy="18" r="15.915" 
+                  fill="transparent" 
+                  stroke="#4adeb5" 
+                  strokeWidth="3.2" 
+                  strokeDasharray="35 65" 
+                  strokeDashoffset="100" 
+                />
+                {/* 35% Segment - Client 2 (blue-600) */}
+                <circle 
+                  cx="18" cy="18" r="15.915" 
+                  fill="transparent" 
+                  stroke="#3b82f6" 
+                  strokeWidth="3.2" 
+                  strokeDasharray="35 65" 
+                  strokeDashoffset="65" 
+                />
+                {/* 30% Segment - Client 3 (purple-500) */}
+                <circle 
+                  cx="18" cy="18" r="15.915" 
+                  fill="transparent" 
+                  stroke="#a855f7" 
+                  strokeWidth="3.2" 
+                  strokeDasharray="30 70" 
+                  strokeDashoffset="30" 
+                />
+              </svg>
+              {/* Inner Donut Text */}
+              <div className="absolute flex flex-col items-center">
+                <Percent className="w-5 h-5 text-gray-400" />
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">Partilha</span>
               </div>
-            ))}
-            {clientData.length === 0 && (
-              <p className="text-sm text-gray-500 py-6 text-center">Nenhum rendimento registado para clientes.</p>
-            )}
+            </div>
+
+            {/* List Details with Legend Colors */}
+            <div className="space-y-3">
+              {clientData.map((client, i) => {
+                const legendColors = ['bg-[#4adeb5]', 'bg-blue-500', 'bg-purple-500']
+                const colorClass = legendColors[i % legendColors.length]
+                return (
+                  <div key={client.name} className="flex items-start gap-2.5">
+                    <div className={`w-3 h-3 rounded-full mt-1 shrink-0 ${colorClass}`} />
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-semibold text-gray-900 leading-none">{client.name}</p>
+                      <p className="text-[10px] text-gray-500 font-mono">
+                        €{formatCurrency(client.value)} ({client.percentage}%)
+                      </p>
+                    </div>
+                  </div>
+                )
+              })}
+              {clientData.length === 0 && (
+                <p className="text-xs text-gray-500 py-6 text-center">Nenhum cliente registado.</p>
+              )}
+            </div>
           </div>
         </Card>
 
@@ -250,7 +291,7 @@ export default function RelatoriosPage() {
 
           <div className="border-t border-gray-100 pt-6 mt-6 text-xs text-gray-400 flex items-center justify-between">
             <span>Última atualização: Hoje</span>
-            <span className="text-emerald-600 font-semibold cursor-pointer hover:underline">Configurar alertas →</span>
+            <span className="text-[#4adeb5] font-semibold cursor-pointer hover:underline">Configurar alertas →</span>
           </div>
         </Card>
       </div>

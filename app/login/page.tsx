@@ -11,10 +11,10 @@ export default function LoginPage() {
   }, [router])
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#f5f7fa] flex items-center justify-center p-4">
       <div className="text-center space-y-4">
-        <div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-slate-400 text-sm">Redirecting to Dashboard...</p>
+        <div className="w-8 h-8 border-2 border-[#4adeb5] border-t-transparent rounded-full animate-spin mx-auto" />
+        <p className="text-gray-500 text-sm">A redirecionar para o painel...</p>
       </div>
     </div>
   )
