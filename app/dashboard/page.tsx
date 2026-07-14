@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Invoice, Profile } from '@/types'
-import { calculateLiquiditySplit, generateTaxAlerts, formatCurrency } from '@/lib/calculations'
+import { calculateTaxes } from '@/lib/taxCalculator'
+import { formatCurrency } from '@/lib/calculations'
 import LiquiditySplitter from '@/components/LiquiditySplitter'
 import TaxAlerts from '@/components/TaxAlerts'
 import { Card, CardContent } from '@/components/ui/card'
@@ -13,7 +14,9 @@ import {
   Landmark,
   Receipt,
   FileText,
-  Plus
+  Plus,
+  Users,
+  MapPin
 } from 'lucide-react'
 import Link from 'next/link'
 import { DEMO_MODE, DEMO_INVOICES, DEMO_PROFILE } from '@/lib/demo-data'
@@ -63,10 +66,61 @@ export default function DashboardPage() {
     )
   }
 
-  const split = calculateLiquiditySplit(invoices)
+  // RUN DYNAMIC TAX CALCULATION ENGINE
+  const defaultProfile: Profile = profile || DEMO_PROFILE
+  const taxResults = calculateTaxes(defaultProfile, invoices)
+
+  // Map result to LiquiditySplitter format
+  const split = {
+    totalMoneyIn: taxResults.grossRevenue,
+    totalMoneyOut: taxResults.expenses,
+    totalVatCollected: taxResults.estimatedVat,
+    totalWithheld: taxResults.totalWithholding,
+    yourMoney: taxResults.netAvailable,
+    stateMoney: taxResults.totalTaxesOwed,
+    statePercentage: Math.round(taxResults.effectiveTaxRate),
+  }
+
   const alerts = profile ? generateTaxAlerts(invoices, profile) : []
   const recentInvoices = invoices.slice(0, 5)
 
+  // KPI Integration: Group sales by Client
+  const clientTotals: { [key: string]: number } = {}
+  invoices
+    .filter((inv) => inv.direction === 'incoming')
+    .forEach((inv) => {
+      clientTotals[inv.client_supplier_name] = (clientTotals[inv.client_supplier_name] || 0) + Number(inv.base_amount)
+    })
+
+  const topClients = Object.keys(clientTotals)
+    .map((client) => ({ name: client, total: clientTotals[client] }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 3)
+
+  // KPI Integration: Group sales by Location (simulated parsing of addresses)
+  // Maps specific client names to regions/cities for display
+  const clientLocations: { [key: string]: string } = {
+    'Empresa ABC, Lda.': 'Lisboa',
+    'StartupXYZ': 'Porto',
+    'Consultora Digital': 'Braga',
+    'Grupo Ferreira & Associados': 'Coimbra',
+    'Tech Solutions Porto': 'Porto',
+    'Google Ireland Limited': 'Estrangeiro (Irlanda)'
+  }
+
+  const locationTotals: { [key: string]: number } = {}
+  invoices
+    .filter((inv) => inv.direction === 'incoming')
+    .forEach((inv) => {
+      const city = clientLocations[inv.client_supplier_name] || 'Outra Região'
+      locationTotals[city] = (locationTotals[city] || 0) + Number(inv.base_amount)
+    })
+
+  const regionalContributions = Object.keys(locationTotals)
+    .map((loc) => ({ location: loc, total: locationTotals[loc] }))
+    .sort((a, b) => b.total - a.total)
+
+  // Simulated points for the Fluxo de Caixa Mensal SVG Line Chart
   const chartPoints = [
     { x: 50, y: 170, label: 'Jan' },
     { x: 150, y: 160, label: 'Fev' },
@@ -79,29 +133,29 @@ export default function DashboardPage() {
 
   const summaryCards = [
     {
-      label: 'Total Recebido',
-      value: split.totalMoneyIn,
+      label: 'Rendimento Bruto',
+      value: taxResults.grossRevenue,
       icon: ArrowDownLeft,
       color: 'text-gray-700',
       bg: 'bg-gray-50',
     },
     {
-      label: 'Total Despesas',
-      value: split.totalMoneyOut,
+      label: 'Despesas Registadas',
+      value: taxResults.expenses,
       icon: ArrowUpRight,
       color: 'text-red-500',
       bg: 'bg-red-50',
     },
     {
-      label: 'IVA Cobrado',
-      value: split.totalVatCollected,
+      label: 'IRS/IRC Estimado',
+      value: taxResults.estimatedIrs + taxResults.estimatedIrc,
       icon: Receipt,
-      color: 'text-[#55708C]', // Muted less shocking state blue
+      color: 'text-[#55708C]',
       bg: 'bg-blue-50/50',
     },
     {
-      label: 'Retenção na Fonte',
-      value: split.totalWithheld,
+      label: 'Segurança Social (SS)',
+      value: taxResults.estimatedSS,
       icon: Landmark,
       color: 'text-purple-600',
       bg: 'bg-purple-50',
@@ -137,7 +191,7 @@ export default function DashboardPage() {
       {/* Liquidity Splitter — Hero */}
       <LiquiditySplitter split={split} />
 
-      {/* Monthly Cash Flow Chart with Manual Input Button Row */}
+      {/* Monthly Cash Flow Chart */}
       <Card className="bg-white border-gray-200 shadow-sm p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
@@ -171,7 +225,7 @@ export default function DashboardPage() {
               </text>
             ))}
 
-            {/* Curve path (Line chart) */}
+            {/* Curve path */}
             <path
               d="M50,170 C100,165 150,160 250,155 C350,140 450,110 550,90 C600,80 650,70 650,70"
               fill="none"
@@ -208,6 +262,50 @@ export default function DashboardPage() {
             </Card>
           )
         })}
+      </div>
+
+      {/* Two Column Grid: Top Clients & Regional Distributions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        {/* Left Column: Top clients KPI */}
+        <Card className="bg-white border-gray-200 shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Users className="w-5 h-5 text-gray-400" />
+            <h2 className="text-lg font-semibold text-gray-900">Principais Clientes Faturados</h2>
+          </div>
+
+          <div className="space-y-3.5">
+            {topClients.map((client, i) => (
+              <div key={client.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-150">
+                <span className="font-semibold text-gray-800 text-sm">{client.name}</span>
+                <span className="font-mono text-emerald-600 font-bold text-sm">€{formatCurrency(client.total)}</span>
+              </div>
+            ))}
+            {topClients.length === 0 && (
+              <p className="text-sm text-gray-500 py-4 text-center">Sem rendimentos registados.</p>
+            )}
+          </div>
+        </Card>
+
+        {/* Right Column: Regional distribution KPI */}
+        <Card className="bg-white border-gray-200 shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <MapPin className="w-5 h-5 text-gray-400" />
+            <h2 className="text-lg font-semibold text-gray-900">Distribuição por Região / Cidade</h2>
+          </div>
+
+          <div className="space-y-3.5">
+            {regionalContributions.map((reg) => (
+              <div key={reg.location} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-150">
+                <span className="font-semibold text-gray-800 text-sm">{reg.location}</span>
+                <span className="font-mono text-gray-700 font-bold text-sm">€{formatCurrency(reg.total)}</span>
+              </div>
+            ))}
+            {regionalContributions.length === 0 && (
+              <p className="text-sm text-gray-500 py-4 text-center">Sem dados de localização.</p>
+            )}
+          </div>
+        </Card>
       </div>
 
       {/* Recent Invoices */}
@@ -270,4 +368,20 @@ export default function DashboardPage() {
       </div>
     </div>
   )
+}
+
+function generateTaxAlerts(invoices: Invoice[], profile: Profile) {
+  const alerts = []
+  const incoming = invoices.filter((inv) => inv.direction === 'incoming')
+  const totalMoneyIn = incoming.reduce((sum, inv) => sum + Number(inv.base_amount), 0)
+
+  if (profile.vat_exempt && totalMoneyIn > 13500) {
+    alerts.push({
+      id: 'vat-threshold-exceeded',
+      type: 'danger' as const,
+      title: 'Limite de Isenção de IVA Ultrapassado',
+      message: `O seu rendimento total (€${formatCurrency(totalMoneyIn)}) ultrapassou o limite de isenção de €13.500. Poderá ter de se registar no regime de IVA e começar a cobrar IVA nas suas faturas.`,
+    })
+  }
+  return alerts
 }

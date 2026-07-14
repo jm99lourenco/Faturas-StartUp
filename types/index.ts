@@ -13,6 +13,30 @@ export interface Profile {
   trabalho_dependente: boolean
   rendimento_dependente_anual: number
   regiao: 'continente' | 'madeira' | 'acores'
+  age: number
+  regime: 'independente' | 'unipessoal'
+  cae: string | null
+  created_at: string
+}
+
+export interface Client {
+  id: string
+  profile_id: string
+  name: string
+  email: string | null
+  phone: string | null
+  notes: string | null
+  created_at: string
+}
+
+export interface Entity {
+  id: string
+  profile_id: string
+  name: string
+  email: string | null
+  phone: string | null
+  notes: string | null
+  address: string | null
   created_at: string
 }
 

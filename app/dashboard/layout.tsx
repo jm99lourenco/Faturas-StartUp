@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   Menu,
+  Users,
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -21,6 +22,7 @@ const sidebarItems = [
   { label: 'Faturas', href: '/dashboard/faturas', icon: FileText },
   { label: 'Estado', href: '/dashboard/estado', icon: BarChart3 },
   { label: 'Relatórios', href: '/dashboard/relatorios', icon: PieChart },
+  { label: 'Clientes e Entidades', href: '/dashboard/clientes', icon: Users },
 ]
 
 function SidebarContent({

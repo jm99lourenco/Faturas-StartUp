@@ -18,6 +18,9 @@ export const DEMO_PROFILE: Profile = {
   trabalho_dependente: false,
   rendimento_dependente_anual: 0,
   regiao: 'continente',
+  age: 32,
+  regime: 'independente',
+  cae: '74100',
   created_at: new Date().toISOString(),
 }
 
