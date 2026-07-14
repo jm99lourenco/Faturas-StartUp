@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Invoice, Profile } from '@/types'
 import { formatCurrency } from '@/lib/calculations'
 import { DEMO_MODE } from '@/lib/demo-data'
@@ -29,6 +30,7 @@ import {
 import { Trash2, CheckCircle, Clock, Upload, Sparkles, RefreshCw, AlertTriangle, FileSpreadsheet } from 'lucide-react'
 
 export default function FaturasPage() {
+  const router = useRouter()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -83,7 +85,10 @@ export default function FaturasPage() {
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        router.push('/login')
+        return
+      }
       const [profileRes, invoicesRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('invoices').select('*').eq('profile_id', user.id).order('date', { ascending: false }),

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { Client, Entity } from '@/types'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -74,6 +75,7 @@ const DEMO_ENTITIES: Entity[] = [
 ]
 
 export default function ClientesPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'clientes' | 'entidades'>('clientes')
   const [clients, setClients] = useState<Client[]>([])
   const [entities, setEntities] = useState<Entity[]>([])
@@ -106,7 +108,10 @@ export default function ClientesPage() {
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        router.push('/login')
+        return
+      }
       
       const [clientsRes, entitiesRes] = await Promise.all([
         supabase.from('clients').select('*').eq('profile_id', user.id).order('name', { ascending: true }),

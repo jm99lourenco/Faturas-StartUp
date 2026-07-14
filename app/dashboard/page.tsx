@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { Invoice, Profile } from '@/types'
 import { calculateTaxes } from '@/lib/taxCalculator'
 import { formatCurrency } from '@/lib/calculations'
@@ -23,6 +24,7 @@ import { DEMO_MODE } from '@/lib/demo-data'
 import { getLocalInvoices, getLocalProfile, getLocalEntities } from '@/lib/localStorage'
 
 export default function DashboardPage() {
+  const router = useRouter()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -38,7 +40,10 @@ export default function DashboardPage() {
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        router.push('/login')
+        return
+      }
       const [profileRes, invoicesRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('invoices').select('*').eq('profile_id', user.id).order('date', { ascending: false }),

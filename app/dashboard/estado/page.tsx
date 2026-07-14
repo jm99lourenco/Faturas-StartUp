@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { Invoice } from '@/types'
 import { formatCurrency, calculateLiquiditySplit, calculateProgressiveIRS } from '@/lib/calculations'
 import { DEMO_MODE } from '@/lib/demo-data'
@@ -31,6 +32,7 @@ import {
 } from 'lucide-react'
 
 export default function EstadoPage() {
+  const router = useRouter()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -64,7 +66,10 @@ export default function EstadoPage() {
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        router.push('/login')
+        return
+      }
       
       const [profileRes, invoicesRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
