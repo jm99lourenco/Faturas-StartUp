@@ -56,7 +56,7 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-gray-400 text-sm">A carregar o seu painel...</p>
         </div>
       </div>
@@ -121,8 +121,8 @@ export default function DashboardPage() {
             Resumo das suas finanças
           </p>
         </div>
-        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-md shadow-blue-600/20">
-          <span className="text-white text-xl font-bold italic">S</span>
+        <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-md shadow-emerald-500/20">
+          <span className="text-white text-xl font-bold italic">R</span>
         </div>
       </div>
 
@@ -140,7 +140,7 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-400">Rendimentos acumulados vs despesas justificadas</p>
           </div>
           <Link href="/dashboard/faturas">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold h-11 px-6 rounded-xl shadow-md shadow-blue-600/20 gap-2 w-full sm:w-auto">
+            <Button className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold h-11 px-6 rounded-xl shadow-md shadow-emerald-500/20 gap-2 w-full sm:w-auto">
               <Plus className="w-4 h-4" /> Adicionar Entrada Manual
             </Button>
           </Link>
@@ -149,7 +149,6 @@ export default function DashboardPage() {
         {/* SVG Line Chart */}
         <div className="relative">
           <svg viewBox="0 0 700 200" className="w-full h-44" xmlns="http://www.w3.org/2000/svg">
-            {/* Grid horizontal lines */}
             <line x1="30" y1="40" x2="670" y2="40" stroke="#f1f5f9" strokeWidth="1" />
             <line x1="30" y1="100" x2="670" y2="100" stroke="#f1f5f9" strokeWidth="1" />
             <line x1="30" y1="160" x2="670" y2="160" stroke="#e2e8f0" strokeWidth="1.5" />
@@ -165,14 +164,14 @@ export default function DashboardPage() {
             <path
               d="M50,170 C100,165 150,160 250,155 C350,140 450,110 550,90 C600,80 650,70 650,70"
               fill="none"
-              stroke="#4361ee"
+              stroke="#10b981"
               strokeWidth="3"
               strokeLinecap="round"
             />
 
             {/* Chart dots */}
             {chartPoints.map((pt, i) => (
-              <circle key={i} cx={pt.x} cy={pt.y} r="4" fill="#4361ee" />
+              <circle key={i} cx={pt.x} cy={pt.y} r="4" fill="#10b981" />
             ))}
           </svg>
         </div>
@@ -206,7 +205,7 @@ export default function DashboardPage() {
           <h2 className="text-lg font-semibold text-gray-900">Faturas Recentes</h2>
           <Link
             href="/dashboard/faturas"
-            className="text-sm text-blue-600 hover:text-blue-700 transition-colors font-medium"
+            className="text-sm text-emerald-600 hover:text-emerald-700 transition-colors font-medium"
           >
             Ver todas →
           </Link>
@@ -219,7 +218,7 @@ export default function DashboardPage() {
               <p className="text-gray-500 text-sm">Ainda não tem faturas</p>
               <Link
                 href="/dashboard/faturas"
-                className="text-sm text-blue-600 hover:text-blue-700 mt-2 inline-block font-medium"
+                className="text-sm text-emerald-600 hover:text-emerald-700 mt-2 inline-block font-medium"
               >
                 Adicionar primeira fatura →
               </Link>

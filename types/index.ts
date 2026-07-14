@@ -8,6 +8,11 @@ export interface Profile {
   nif: string | null
   vat_exempt: boolean
   default_withholding_rate: number
+  dependentes: number
+  estado_civil: 'solteiro' | 'casado_1' | 'casado_2'
+  trabalho_dependente: boolean
+  rendimento_dependente_anual: number
+  regiao: 'continente' | 'madeira' | 'acores'
   created_at: string
 }
 

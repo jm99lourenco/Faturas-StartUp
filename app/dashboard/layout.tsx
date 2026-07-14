@@ -16,12 +16,12 @@ import {
   Menu,
 } from 'lucide-react'
 
+// Settings link removed from the main sidebar items list
 const sidebarItems = [
   { label: 'Início', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Faturas', href: '/dashboard/faturas', icon: FileText },
   { label: 'Estado', href: '/dashboard/estado', icon: BarChart3 },
   { label: 'Relatórios', href: '/dashboard/relatorios', icon: PieChart },
-  { label: 'Configurações', href: '/dashboard/configuracoes', icon: Settings },
 ]
 
 function SidebarContent({
@@ -35,11 +35,12 @@ function SidebarContent({
 }) {
   return (
     <div className="flex flex-col h-full bg-white">
-      {/* Logo */}
-      <div className="p-6 flex justify-center">
-        <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-          <span className="text-white text-2xl font-bold italic">S</span>
+      {/* Brand logo: Modern "R" symbol in green */}
+      <div className="p-6 flex flex-col items-center">
+        <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 mb-2">
+          <span className="text-white text-3xl font-extrabold italic tracking-tighter">R</span>
         </div>
+        <span className="text-sm font-bold text-gray-900 tracking-tight">Reqibo</span>
       </div>
 
       {/* Navigation */}
@@ -51,9 +52,9 @@ function SidebarContent({
             <button
               key={item.href}
               onClick={() => onNavigate(item.href)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
                 isActive
-                  ? 'bg-blue-50 text-blue-600'
+                  ? 'bg-emerald-50 text-emerald-600'
                   : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
               }`}
             >
@@ -66,18 +67,22 @@ function SidebarContent({
 
       <Separator className="bg-gray-100 mx-3" />
 
-      {/* Bottom Actions */}
+      {/* Bottom Actions: Single Configurações link and Sair */}
       <div className="p-3 space-y-1">
         <button
           onClick={() => onNavigate('/dashboard/configuracoes')}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-all duration-200"
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+            pathname === '/dashboard/configuracoes'
+              ? 'bg-emerald-50 text-emerald-600'
+              : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
+          }`}
         >
           <Settings className="w-5 h-5" />
           Configurações
         </button>
         <button
           onClick={onLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all duration-200"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-all duration-200"
         >
           <LogOut className="w-5 h-5" />
           Sair
@@ -124,7 +129,7 @@ export default function DashboardLayout({
 
       {/* Main area */}
       <div className="flex-1 lg:pl-48 flex flex-col">
-        {/* Mobile Header only (hides on desktop) */}
+        {/* Mobile Header only */}
         <header className="lg:hidden sticky top-0 z-40 bg-white border-b border-gray-200">
           <div className="flex items-center justify-between px-4 h-14">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -145,10 +150,10 @@ export default function DashboardLayout({
             </Sheet>
 
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold italic">S</span>
+              <div className="w-7 h-7 bg-emerald-500 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold italic">R</span>
               </div>
-              <span className="text-lg font-bold text-gray-900">Saldo Certo</span>
+              <span className="text-lg font-bold text-gray-900">Reqibo</span>
             </div>
             
             <div className="w-8 h-8" /> {/* Spacer */}

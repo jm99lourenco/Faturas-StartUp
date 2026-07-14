@@ -12,7 +12,8 @@ import {
   Download, 
   TrendingUp, 
   FileSpreadsheet, 
-  Briefcase 
+  Briefcase,
+  HelpCircle
 } from 'lucide-react'
 
 export default function RelatoriosPage() {
@@ -51,7 +52,7 @@ export default function RelatoriosPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-gray-400 text-sm">A carregar relatórios...</p>
         </div>
       </div>
@@ -60,8 +61,6 @@ export default function RelatoriosPage() {
 
   const split = calculateLiquiditySplit(invoices)
 
-  // Aggregate monthly values for cash flow chart
-  // Mock monthly data points based on invoices to draw a line chart
   const monthlyFlow = [
     { month: 'Jan', in: 1800, out: 200 },
     { month: 'Fev', in: 2500, out: 300 },
@@ -97,10 +96,10 @@ export default function RelatoriosPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="border-gray-300 text-gray-700 rounded-xl h-10 gap-2">
+          <Button variant="outline" className="border-gray-300 text-gray-700 rounded-xl h-10 gap-2 font-semibold">
             <FileSpreadsheet className="w-4 h-4" /> Exportar CSV
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-10 gap-2 shadow-md shadow-blue-600/10">
+          <Button className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-10 gap-2 shadow-md shadow-emerald-500/10 font-semibold">
             <Download className="w-4 h-4" /> Descarregar PDF
           </Button>
         </div>
@@ -110,17 +109,17 @@ export default function RelatoriosPage() {
       <Card className="bg-white border-gray-200 shadow-sm p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Fluxo de Caixa Mensal</h2>
-            <p className="text-xs text-gray-400">Evolução do dinheiro acumulado vs. despesas ao longo do ano</p>
+            <h2 className="text-lg font-bold text-gray-900">Fluxo de Caixa Mensal</h2>
+            <p className="text-xs text-gray-400">Evolução do dinheiro bruto acumulado vs. dinheiro líquido (livre de impostos)</p>
           </div>
           <div className="flex items-center gap-4 text-xs font-semibold">
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-1.5 rounded bg-blue-600" />
-              <span className="text-gray-600">Rendimentos</span>
+              <div className="w-3 h-1.5 rounded bg-emerald-500" />
+              <span className="text-gray-600">Rendimento Bruto</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-1.5 rounded bg-emerald-400" />
-              <span className="text-gray-600">O Teu Dinheiro</span>
+              <div className="w-3 h-1.5 rounded bg-emerald-300" />
+              <span className="text-gray-600">O Teu Dinheiro (Líquido)</span>
             </div>
           </div>
         </div>
@@ -128,7 +127,6 @@ export default function RelatoriosPage() {
         {/* SVG Interactive Chart */}
         <div className="relative">
           <svg viewBox="0 0 800 240" className="w-full h-56" xmlns="http://www.w3.org/2000/svg">
-            {/* Grid Lines */}
             <line x1="50" y1="40" x2="750" y2="40" stroke="#f1f5f9" strokeWidth="1" />
             <line x1="50" y1="100" x2="750" y2="100" stroke="#f1f5f9" strokeWidth="1" />
             <line x1="50" y1="160" x2="750" y2="160" stroke="#f1f5f9" strokeWidth="1" />
@@ -141,29 +139,26 @@ export default function RelatoriosPage() {
               </text>
             ))}
 
-            {/* Income line (Blue) */}
+            {/* Income line (Green) */}
             <path
               d="M50,180 L165,160 L280,140 L395,110 L510,95 L625,70 L740,45"
               fill="none"
-              stroke="#4361ee"
+              stroke="#10b981"
               strokeWidth="3.5"
               strokeLinecap="round"
             />
-            {/* Net money line (Mint Green) */}
+            {/* Net money line (Light Green) */}
             <path
               d="M50,195 L165,180 L280,165 L395,140 L510,120 L625,95 L740,75"
               fill="none"
-              stroke="#7ce2af"
+              stroke="#6ee7b7"
               strokeWidth="3.5"
               strokeLinecap="round"
             />
 
-            {/* Blue Points */}
-            <circle cx="740" cy="45" r="5" fill="#4361ee" />
-            <circle cx="625" cy="70" r="4" fill="#4361ee" />
-
-            {/* Green Points */}
-            <circle cx="740" cy="75" r="5" fill="#7ce2af" />
+            {/* Points */}
+            <circle cx="740" cy="45" r="5" fill="#10b981" />
+            <circle cx="740" cy="75" r="5" fill="#6ee7b7" />
           </svg>
         </div>
       </Card>
@@ -173,9 +168,18 @@ export default function RelatoriosPage() {
         
         {/* Left Column: Client Share */}
         <Card className="bg-white border-gray-200 shadow-sm p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Briefcase className="w-5 h-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Distribuição por Cliente</h2>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-emerald-500" />
+              <h2 className="text-lg font-bold text-gray-900">Distribuição por Cliente</h2>
+            </div>
+            {/* Tooltip to explain Client Distribution */}
+            <div className="group relative cursor-help">
+              <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors" />
+              <div className="absolute right-0 top-6 hidden group-hover:block bg-slate-900 text-white text-[10px] p-3 rounded-xl shadow-xl w-60 z-20 leading-relaxed">
+                Mostra a percentagem de rendimento que provém de cada cliente. Útil para identificar o seu grau de dependência comercial (risco de concentração).
+              </div>
+            </div>
           </div>
           
           <div className="space-y-4">
@@ -189,7 +193,7 @@ export default function RelatoriosPage() {
                 </div>
                 <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-blue-600 rounded-full transition-all duration-1000"
+                    className="h-full bg-emerald-500 rounded-full transition-all duration-1000"
                     style={{ width: `${client.percentage}%` }}
                   />
                 </div>
@@ -205,8 +209,8 @@ export default function RelatoriosPage() {
         <Card className="bg-white border-gray-200 shadow-sm p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-6">
-              <TrendingUp className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Indicadores de Performance</h2>
+              <TrendingUp className="w-5 h-5 text-emerald-500" />
+              <h2 className="text-lg font-bold text-gray-900">Indicadores de Performance</h2>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -219,34 +223,34 @@ export default function RelatoriosPage() {
               </div>
 
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-150">
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Rácio de Sobrevivência</p>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Margem Líquida Real</p>
                 <p className="text-xl font-bold text-emerald-600 font-mono">
                   {split.totalMoneyIn > 0 ? Math.round((split.yourMoney / split.totalMoneyIn) * 100) : 0}%
                 </p>
-                <span className="text-[10px] text-gray-500">Do rendimento que fica para si</span>
+                <span className="text-[10px] text-gray-500">Percentagem livre para si</span>
               </div>
 
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-150">
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Retenção Média</p>
-                <p className="text-xl font-bold text-purple-600 font-mono">
-                  {split.totalMoneyIn > 0 ? Math.round((split.totalWithheld / split.totalMoneyIn) * 100) : 0}%
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Carga Fiscal Média</p>
+                <p className="text-xl font-bold text-blue-600 font-mono">
+                  {split.totalMoneyIn > 0 ? Math.round((split.stateMoney / split.totalMoneyIn) * 100) : 0}%
                 </p>
-                <span className="text-[10px] text-gray-500">Taxa média de retenção</span>
+                <span className="text-[10px] text-gray-500">Percentagem retida para impostos</span>
               </div>
 
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-150">
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Despesa Acumulada</p>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Rácio Despesa / Ganho</p>
                 <p className="text-xl font-bold text-red-500 font-mono">
-                  €{formatCurrency(split.totalMoneyOut)}
+                  {split.totalMoneyIn > 0 ? Math.round((split.totalMoneyOut / split.totalMoneyIn) * 100) : 0}%
                 </p>
-                <span className="text-[10px] text-gray-500">Custos totais registados</span>
+                <span className="text-[10px] text-gray-500">Percentagem gasta em despesas</span>
               </div>
             </div>
           </div>
 
           <div className="border-t border-gray-100 pt-6 mt-6 text-xs text-gray-400 flex items-center justify-between">
             <span>Última atualização: Hoje</span>
-            <span className="text-blue-600 font-semibold cursor-pointer hover:underline">Configurar alertas →</span>
+            <span className="text-emerald-600 font-semibold cursor-pointer hover:underline">Configurar alertas →</span>
           </div>
         </Card>
       </div>

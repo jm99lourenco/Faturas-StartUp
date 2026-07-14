@@ -4,7 +4,7 @@ export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true'
 
 export const DEMO_USER = {
   id: 'demo-user-001',
-  email: 'demo@saldocerto.pt',
+  email: 'demo@reqibo.pt',
 }
 
 export const DEMO_PROFILE: Profile = {
@@ -13,6 +13,11 @@ export const DEMO_PROFILE: Profile = {
   nif: '123456789',
   vat_exempt: true,
   default_withholding_rate: 25,
+  dependentes: 1,
+  estado_civil: 'solteiro',
+  trabalho_dependente: false,
+  rendimento_dependente_anual: 0,
+  regiao: 'continente',
   created_at: new Date().toISOString(),
 }
 

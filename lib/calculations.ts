@@ -19,8 +19,6 @@ export function calculateWithholding(baseAmount: number, withholdingRate: number
 
 /**
  * Calculate the total amount for an invoice
- * Incoming: base + VAT - withholding (what you actually receive)
- * Outgoing: base + VAT (what you actually pay)
  */
 export function calculateInvoiceTotal(
   baseAmount: number,
@@ -29,40 +27,26 @@ export function calculateInvoiceTotal(
   direction: 'incoming' | 'outgoing'
 ): number {
   if (direction === 'incoming') {
-    // You receive: base + VAT - withholding
     return Math.round((baseAmount + vatAmount - withholdingAmount) * 100) / 100
   }
-  // You pay: base + VAT
   return Math.round((baseAmount + vatAmount) * 100) / 100
 }
 
 /**
  * Calculate the full liquidity split from a set of invoices
- * This is the core function that powers the dashboard
  */
 export function calculateLiquiditySplit(invoices: Invoice[]): LiquiditySplit {
   const incoming = invoices.filter((inv) => inv.direction === 'incoming')
   const outgoing = invoices.filter((inv) => inv.direction === 'outgoing')
 
-  // Total Money In = sum of base amounts on incoming invoices
   const totalMoneyIn = incoming.reduce((sum, inv) => sum + Number(inv.base_amount), 0)
-
-  // Total VAT Collected = sum of VAT on incoming invoices
   const totalVatCollected = incoming.reduce((sum, inv) => sum + Number(inv.vat_amount), 0)
-
-  // Total Withheld = sum of withholding on incoming invoices
   const totalWithheld = incoming.reduce((sum, inv) => sum + Number(inv.withholding_amount), 0)
-
-  // Total Money Out = sum of total amounts on outgoing invoices
   const totalMoneyOut = outgoing.reduce((sum, inv) => sum + Number(inv.total_amount), 0)
 
-  // The State's Money = VAT collected + amounts withheld
   const stateMoney = Math.round((totalVatCollected + totalWithheld) * 100) / 100
-
-  // Your Money = Total Money In - State's Money - Expenses
   const yourMoney = Math.round((totalMoneyIn - stateMoney - totalMoneyOut) * 100) / 100
 
-  // Calculate percentage for the visual split
   const totalPool = yourMoney + stateMoney
   const statePercentage = totalPool > 0 ? Math.round((stateMoney / totalPool) * 100) : 0
 
@@ -78,8 +62,110 @@ export function calculateLiquiditySplit(invoices: Invoice[]): LiquiditySplit {
 }
 
 /**
+ * Portuguese progressive IRS brackets (25/26 simulation)
+ */
+interface IrsBracket {
+  limit: number
+  rate: number
+  deduction: number
+}
+
+const IRS_BRACKETS_CONTINENTE: IrsBracket[] = [
+  { limit: 7703, rate: 0.13, deduction: 0 },
+  { limit: 11623, rate: 0.165, deduction: 269.61 },
+  { limit: 16472, rate: 0.22, deduction: 908.88 },
+  { limit: 21321, rate: 0.25, deduction: 1403.04 },
+  { limit: 27146, rate: 0.32, deduction: 2895.51 },
+  { limit: 39799, rate: 0.355, deduction: 3845.62 },
+  { limit: 51997, rate: 0.385, deduction: 5039.59 },
+  { limit: 81199, rate: 0.45, deduction: 8419.40 },
+  { limit: Infinity, rate: 0.48, deduction: 10855.37 },
+]
+
+// Madeira rates are slightly lower
+const IRS_BRACKETS_MADEIRA: IrsBracket[] = IRS_BRACKETS_CONTINENTE.map(b => ({
+  limit: b.limit,
+  rate: Math.round(b.rate * 0.7 * 1000) / 1000,
+  deduction: Math.round(b.deduction * 0.7 * 100) / 100
+}))
+
+// Azores rates are slightly lower
+const IRS_BRACKETS_ACORES: IrsBracket[] = IRS_BRACKETS_CONTINENTE.map(b => ({
+  limit: b.limit,
+  rate: Math.round(b.rate * 0.75 * 1000) / 1000,
+  deduction: Math.round(b.deduction * 0.75 * 100) / 100
+}))
+
+/**
+ * Calculate Progressive IRS under the Portuguese Simplified Regime (Category B)
+ */
+export function calculateProgressiveIRS(
+  categoryBIncome: number,
+  params: {
+    dependentes: number
+    estado_civil: 'solteiro' | 'casado_1' | 'casado_2'
+    trabalho_dependente: boolean
+    rendimento_dependente_anual: number
+    regiao: 'continente' | 'madeira' | 'acores'
+  }
+) {
+  // 1. Calculate Taxable Income from Category B (75% coefficient for services)
+  const taxableCategoryB = categoryBIncome * 0.75
+
+  // 2. Add Category A (Trabalho dependente) taxable income (with standard €4104 deduction)
+  const taxableCategoryA = params.trabalho_dependente
+    ? Math.max(0, params.rendimento_dependente_anual - 4104)
+    : 0
+
+  let totalTaxableIncome = taxableCategoryB + taxableCategoryA
+
+  // 3. Apply conjugal quotient (divided by 2 if casado joint filing)
+  const isMarriedJoint = params.estado_civil === 'casado_2'
+  const conjugalQuotient = isMarriedJoint ? 2 : 1
+  const incomeForBrackets = totalTaxableIncome / conjugalQuotient
+
+  // 4. Select regional brackets
+  const brackets = 
+    params.regiao === 'madeira' 
+      ? IRS_BRACKETS_MADEIRA 
+      : params.regiao === 'acores' 
+        ? IRS_BRACKETS_ACORES 
+        : IRS_BRACKETS_CONTINENTE
+
+  // 5. Find bracket and calculate base tax
+  let baseTax = 0
+  for (const bracket of brackets) {
+    if (incomeForBrackets <= bracket.limit) {
+      baseTax = (incomeForBrackets * bracket.rate) - bracket.deduction
+      break
+    }
+  }
+
+  // Multiply back by conjugal quotient
+  let totalBaseTax = baseTax * conjugalQuotient
+
+  // 6. Apply deductions for dependents (€600 per dependent)
+  const dependentsDeduction = params.dependentes * 600
+  const finalIrsLiability = Math.max(0, totalBaseTax - dependentsDeduction)
+
+  // 7. Calculate average effective tax rate
+  const effectiveRate = totalTaxableIncome > 0 ? (finalIrsLiability / totalBaseIncome(categoryBIncome, params.rendimento_dependente_anual)) * 100 : 0
+
+  return {
+    rendimentoTributavel: totalTaxableIncome,
+    irsBruto: totalBaseTax,
+    deducoesDependentes: dependentsDeduction,
+    coletaLiquida: finalIrsLiability,
+    taxaEfetiva: Math.round(effectiveRate * 10) / 10,
+  }
+}
+
+function totalBaseIncome(catB: number, catA: number) {
+  return catB + catA
+}
+
+/**
  * Check if total income exceeds the VAT exemption threshold
- * and generate appropriate tax alerts
  */
 export function generateTaxAlerts(
   invoices: Invoice[],
@@ -89,7 +175,6 @@ export function generateTaxAlerts(
   const incoming = invoices.filter((inv) => inv.direction === 'incoming')
   const totalMoneyIn = incoming.reduce((sum, inv) => sum + Number(inv.base_amount), 0)
 
-  // Alerta de limite de isenção de IVA
   if (profile.vat_exempt && totalMoneyIn > VAT_EXEMPTION_THRESHOLD) {
     alerts.push({
       id: 'vat-threshold-exceeded',
@@ -106,7 +191,6 @@ export function generateTaxAlerts(
     })
   }
 
-  // Sem faturas
   if (invoices.length === 0) {
     alerts.push({
       id: 'no-invoices',

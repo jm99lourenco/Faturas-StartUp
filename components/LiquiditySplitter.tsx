@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react'
 import { LiquiditySplit } from '@/types'
 import { formatCurrency } from '@/lib/calculations'
 import { Card } from '@/components/ui/card'
+import { Wallet, Landmark, ArrowRight } from 'lucide-react'
 
 interface LiquiditySplitterProps {
   split: LiquiditySplit
 }
 
-function useCountUp(target: number, duration: number = 1200) {
+function useCountUp(target: number, duration: number = 1000) {
   const [value, setValue] = useState(0)
 
   useEffect(() => {
@@ -49,148 +50,82 @@ export default function LiquiditySplitter({ split }: LiquiditySplitterProps) {
     setMounted(true)
   }, [])
 
-  // Avoid divide by zero
   const totalPool = split.yourMoney + split.stateMoney
-  const yourRatio = totalPool > 0 ? split.yourMoney / totalPool : 0.7
-  const stateRatio = totalPool > 0 ? split.stateMoney / totalPool : 0.3
-
-  // Size base dimensions for 3D boxes
-  const baseWidth = 320 // max width of the container
-  const yourMoneyWidth = Math.max(80, Math.min(260, baseWidth * yourRatio))
-  const stateMoneyWidth = Math.max(60, Math.min(180, baseWidth * stateRatio))
+  const yourPercentage = totalPool > 0 ? Math.round((split.yourMoney / totalPool) * 100) : 70
+  const statePercentage = 100 - yourPercentage
 
   return (
     <div className="space-y-6">
-      {/* Title */}
       <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
         A tua Liquidez
       </h2>
 
-      {/* Main 3D Container Card */}
-      <Card className="relative overflow-hidden bg-gradient-to-tr from-white to-gray-50 border-gray-200 p-8 shadow-sm flex flex-col items-center justify-center min-h-[340px]">
-        {/* Ambient background glow matching the screenshot reflection */}
+      {/* Main Split Visualization Card */}
+      <Card className="relative overflow-hidden bg-white border border-gray-150 p-8 shadow-sm rounded-2xl">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-64 h-64 bg-emerald-400/20 rounded-full blur-3xl opacity-60" />
-          <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl opacity-60" />
+          <div className="absolute -top-40 -left-40 w-96 h-96 bg-emerald-100/30 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-50/40 rounded-full blur-3xl" />
         </div>
 
-        {/* 3D Scene Viewport */}
-        <div className={`relative flex items-center justify-center w-full max-w-lg transition-all duration-1000 ${mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-          {/* Isometric Perspective Wrapper */}
-          <div 
-            className="flex items-end justify-center gap-6 select-none"
-            style={{
-              perspective: '1000px',
-              transformStyle: 'preserve-3d',
-              paddingBottom: '40px'
-            }}
-          >
-            {/* 1. YOUR MONEY BLOCK (Mint Green) */}
-            <div className="relative group cursor-pointer" style={{ transformStyle: 'preserve-3d' }}>
-              {/* Tooltip Popup */}
-              <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2 rounded-xl text-center shadow-lg transition-transform duration-300 group-hover:-translate-y-2 pointer-events-none z-30 min-w-[120px]">
-                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Your Money</p>
-                <p className="text-sm font-bold font-mono">€{formatCurrency(animatedYourMoney)}</p>
-                {/* Arrow */}
-                <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 rotate-45" />
+        <div className="relative z-10 space-y-8">
+          {/* Split Info Rows */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* O Seu Dinheiro */}
+            <div className="flex items-start gap-4 p-5 bg-gradient-to-br from-emerald-50/30 to-white border border-emerald-100/50 rounded-2xl">
+              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-md shadow-emerald-500/20 shrink-0">
+                <Wallet className="w-6 h-6" />
               </div>
-
-              {/* 3D Shape */}
-              <div 
-                className="relative transition-all duration-500 ease-out group-hover:translate-y-[-8px]"
-                style={{
-                  transform: 'rotateX(60deg) rotateY(0deg) rotateZ(-45deg)',
-                  transformStyle: 'preserve-3d',
-                  width: `${yourMoneyWidth}px`,
-                  height: '140px',
-                }}
-              >
-                {/* Top Face */}
-                <div 
-                  className="absolute inset-0 bg-[#7ce2af] flex items-center justify-center font-bold text-slate-800 text-lg shadow-inner select-none"
-                  style={{
-                    transform: 'translateZ(60px)',
-                    boxShadow: 'inset 0 0 20px rgba(255,255,255,0.4)',
-                    border: '1px solid rgba(255,255,255,0.3)'
-                  }}
-                >
-                  <span className="transform rotate-45 select-none opacity-80">Your Money</span>
-                </div>
-
-                {/* Left Face */}
-                <div 
-                  className="absolute left-0 bottom-0 origin-bottom-left bg-[#5fc896]"
-                  style={{
-                    width: '100%',
-                    height: '60px',
-                    transform: 'rotateX(-90deg)',
-                  }}
-                />
-
-                {/* Right Face */}
-                <div 
-                  className="absolute right-0 top-0 origin-top-right bg-[#4fae81]"
-                  style={{
-                    width: '60px',
-                    height: '100%',
-                    transform: 'rotateY(90deg)',
-                  }}
-                />
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">O Seu Dinheiro</span>
+                <p className="text-4xl font-extrabold text-emerald-600 font-mono tracking-tight">
+                  €{formatCurrency(animatedYourMoney)}
+                </p>
+                <p className="text-xs text-gray-500 font-medium">
+                  {yourPercentage}% livre de impostos e despesas
+                </p>
               </div>
             </div>
 
-            {/* 2. STATE MONEY BLOCK (Royal Blue) */}
-            <div className="relative group cursor-pointer" style={{ transformStyle: 'preserve-3d' }}>
-              {/* Tooltip Popup */}
-              <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2 rounded-xl text-center shadow-lg transition-transform duration-300 group-hover:-translate-y-2 pointer-events-none z-30 min-w-[120px]">
-                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">State Money</p>
-                <p className="text-sm font-bold font-mono">€{formatCurrency(animatedStateMoney)}</p>
-                {/* Arrow */}
-                <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 rotate-45" />
+            {/* O Estado */}
+            <div className="flex items-start gap-4 p-5 bg-gradient-to-br from-blue-50/20 to-white border border-blue-100/30 rounded-2xl">
+              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-blue-600/20 shrink-0">
+                <Landmark className="w-6 h-6" />
               </div>
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">O Estado</span>
+                <p className="text-4xl font-extrabold text-blue-600 font-mono tracking-tight">
+                  €{formatCurrency(animatedStateMoney)}
+                </p>
+                <p className="text-xs text-gray-500 font-medium">
+                  {statePercentage}% reservados para IVA e IRS
+                </p>
+              </div>
+            </div>
+          </div>
 
-              {/* 3D Shape */}
+          {/* Clean Premium Progress Ratio bar */}
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-100 rounded-2xl overflow-hidden flex shadow-inner">
+              {/* O Seu Dinheiro segment */}
               <div 
-                className="relative transition-all duration-500 ease-out group-hover:translate-y-[-8px]"
-                style={{
-                  transform: 'rotateX(60deg) rotateY(0deg) rotateZ(-45deg)',
-                  transformStyle: 'preserve-3d',
-                  width: `${stateMoneyWidth}px`,
-                  height: '140px',
-                }}
-              >
-                {/* Top Face */}
-                <div 
-                  className="absolute inset-0 bg-[#2b59ff] flex items-center justify-center font-bold text-white text-lg shadow-inner select-none"
-                  style={{
-                    transform: 'translateZ(90px)', // taller block for emphasis
-                    boxShadow: 'inset 0 0 20px rgba(255,255,255,0.2)',
-                    border: '1px solid rgba(255,255,255,0.2)'
-                  }}
-                >
-                  <span className="transform rotate-45 select-none opacity-85">State</span>
-                </div>
-
-                {/* Left Face */}
-                <div 
-                  className="absolute left-0 bottom-0 origin-bottom-left bg-[#1d43d4]"
-                  style={{
-                    width: '100%',
-                    height: '90px',
-                    transform: 'rotateX(-90deg)',
-                  }}
-                />
-
-                {/* Right Face */}
-                <div 
-                  className="absolute right-0 top-0 origin-top-right bg-[#1534a7]"
-                  style={{
-                    width: '90px',
-                    height: '100%',
-                    transform: 'rotateY(90deg)',
-                  }}
-                />
-              </div>
+                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-l-2xl transition-all duration-1000 ease-out"
+                style={{ width: mounted ? `${yourPercentage}%` : '0%' }}
+              />
+              {/* O Estado segment */}
+              <div 
+                className="h-full bg-gradient-to-r from-blue-600 to-blue-500 rounded-r-2xl transition-all duration-1000 ease-out"
+                style={{ width: mounted ? `${statePercentage}%` : '0%' }}
+              />
+            </div>
+            
+            {/* Split Info Labels */}
+            <div className="flex justify-between text-xs font-bold text-gray-400 px-1 pt-1">
+              <span className="text-emerald-600 flex items-center gap-1">
+                {yourPercentage}% Livre
+              </span>
+              <span className="text-blue-600 flex items-center gap-1">
+                Reservado {statePercentage}%
+              </span>
             </div>
           </div>
         </div>

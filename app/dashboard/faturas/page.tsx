@@ -84,14 +84,14 @@ export default function FaturasPage() {
     loadData()
   }, [loadData])
 
-  // Simulation of OCR file scan
+  // Simulation of OCR file scan (removed all "IA" references)
   const handleScanSimulation = () => {
     setScanning(true)
     setScanSuccess(false)
     setScanStep('A ler ficheiro PDF/Imagem...')
     
     setTimeout(() => {
-      setScanStep('A extrair dados com IA (NIF, Valores, Taxas)...')
+      setScanStep('A extrair dados do documento (NIF, Valores, Taxas)...')
       setTimeout(() => {
         setScanStep('A preencher formulário de fatura...')
         setTimeout(() => {
@@ -181,7 +181,7 @@ export default function FaturasPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-gray-400 text-sm">A carregar faturas...</p>
         </div>
       </div>
@@ -198,40 +198,40 @@ export default function FaturasPage() {
             Registe e gira as suas faturas emitidas e recebidas
           </p>
         </div>
-        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-md shadow-blue-600/20">
-          <span className="text-white text-xl font-bold italic">S</span>
+        <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-md shadow-emerald-500/20">
+          <span className="text-white text-xl font-bold italic">R</span>
         </div>
       </div>
 
-      {/* AI OCR Reader & Form */}
+      {/* OCR Reader & Form */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left: AI OCR Drag and Drop */}
+        {/* Left: OCR Drag and Drop */}
         <Card className="lg:col-span-1 bg-white border-gray-200 shadow-sm p-6 flex flex-col justify-between min-h-[300px] relative overflow-hidden">
           {scanning && (
             <div className="absolute inset-0 bg-white/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-6 text-center">
-              <RefreshCw className="w-8 h-8 text-blue-600 animate-spin mb-4" />
+              <RefreshCw className="w-8 h-8 text-emerald-500 animate-spin mb-4" />
               <p className="text-sm font-semibold text-gray-900 mb-1">{scanStep}</p>
               <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden mt-3 max-w-[200px]">
-                <div className="bg-blue-600 h-full animate-[loading_3.5s_ease-in-out_infinite]" style={{ width: '60%' }} />
+                <div className="bg-emerald-500 h-full animate-[loading_3.5s_ease-in-out_infinite]" style={{ width: '60%' }} />
               </div>
             </div>
           )}
 
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-blue-600" />
-              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Digitalização por IA</h2>
+              <Sparkles className="w-5 h-5 text-emerald-500" />
+              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Digitalização de Faturas</h2>
             </div>
             <p className="text-xs text-gray-500 mb-6">
-              Arraste a sua fatura ou carregue uma fotografia para a nossa IA ler os campos de forma automática.
+              Arraste a sua fatura ou carregue uma fotografia para a plataforma preencher os campos de forma automática.
             </p>
             
             <div 
               onClick={handleScanSimulation}
-              className="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-2xl p-8 text-center cursor-pointer transition-all bg-gray-50 hover:bg-blue-50/10 flex flex-col items-center justify-center group"
+              className="border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-2xl p-8 text-center cursor-pointer transition-all bg-gray-50 hover:bg-emerald-50/10 flex flex-col items-center justify-center group"
             >
-              <Upload className="w-10 h-10 text-gray-400 group-hover:text-blue-500 transition-colors mb-3" />
+              <Upload className="w-10 h-10 text-gray-400 group-hover:text-emerald-500 transition-colors mb-3" />
               <span className="text-sm font-semibold text-gray-800">Carregar Fotografia</span>
               <span className="text-xs text-gray-400 mt-1">PDF, PNG, JPG (Max 5MB)</span>
             </div>
@@ -247,9 +247,9 @@ export default function FaturasPage() {
             <Button 
               onClick={handleScanSimulation} 
               variant="outline" 
-              className="w-full border-blue-200 text-blue-600 hover:bg-blue-50 h-11 rounded-xl mt-3 font-semibold"
+              className="w-full border-emerald-200 text-emerald-600 hover:bg-emerald-50 h-11 rounded-xl mt-3 font-semibold"
             >
-              Simular Leitura IA (Demo)
+              Simular Leitura Digital (Demo)
             </Button>
           </div>
         </Card>
@@ -266,7 +266,7 @@ export default function FaturasPage() {
                   value={entidade}
                   onChange={(e) => setEntidade(e.target.value)}
                   required
-                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/20 h-11"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:ring-emerald-500/20 h-11"
                 />
               </div>
 
@@ -278,7 +278,7 @@ export default function FaturasPage() {
                   value={dataEmissao}
                   onChange={(e) => setDataEmissao(e.target.value)}
                   required
-                  className="bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 h-11"
+                  className="bg-white border-gray-300 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500/20 h-11"
                 />
               </div>
             </div>
@@ -296,7 +296,7 @@ export default function FaturasPage() {
                     required
                     min="0.01"
                     step="0.01"
-                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/20 h-11 pr-10 font-mono"
+                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:ring-emerald-500/20 h-11 pr-10 font-mono"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">€</span>
                 </div>
@@ -346,7 +346,7 @@ export default function FaturasPage() {
                 {vatAmount > 0 && (
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>IVA ({taxaIva}%)</span>
-                    <span className="text-blue-600 font-mono">+ €{formatCurrency(vatAmount)}</span>
+                    <span className="text-emerald-600 font-mono">+ €{formatCurrency(vatAmount)}</span>
                   </div>
                 )}
                 {withholdingAmount > 0 && (
@@ -358,7 +358,7 @@ export default function FaturasPage() {
                 <div className="border-t border-gray-250 pt-2 mt-2">
                   <div className="flex justify-between text-sm font-bold text-gray-900">
                     <span>Total a Receber</span>
-                    <span className="text-green-600 font-mono">€{formatCurrency(totalAmount)}</span>
+                    <span className="text-emerald-600 font-mono">€{formatCurrency(totalAmount)}</span>
                   </div>
                 </div>
               </div>
@@ -374,7 +374,7 @@ export default function FaturasPage() {
               <Button
                 type="submit"
                 disabled={submitting || !entidade || !valorBase}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 h-11 rounded-xl shadow-md shadow-blue-600/20 transition-all duration-200"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 h-11 rounded-xl shadow-md shadow-emerald-500/20 transition-all duration-200"
               >
                 {submitting ? 'A gravar...' : 'Validar e Gravar Fatura'}
               </Button>
