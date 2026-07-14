@@ -52,7 +52,7 @@ export default function LoginPage() {
   const handleTestUserLogin = async () => {
     setLoading(true)
     setErrorMsg('')
-    const testEmail = 'teste@reqibo.pt'
+    const testEmail = 'teste.reqibo@gmail.com'
     const testPassword = 'reqibo_password_2026'
 
     try {
