@@ -25,8 +25,8 @@ import {
   CheckCircle,
   AlertTriangle,
   FileText,
-  Sliders,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Sliders
 } from 'lucide-react'
 
 export default function EstadoPage() {
@@ -109,7 +109,7 @@ export default function EstadoPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: '#7DFABE', borderTopColor: 'transparent' }} />
           <p className="text-gray-400 text-sm">A carregar obrigações fiscais...</p>
         </div>
       </div>
@@ -125,12 +125,9 @@ export default function EstadoPage() {
   const totalWithholding = incoming.reduce((sum, inv) => sum + Number(inv.withholding_amount), 0)
 
   // Social Security math
-  // Quarterly base average (simplified for visual representation)
   const ssRendimentoTrimestre = totalBaseIncome / 2
   const ssBaseTributavelTrimestre = ssRendimentoTrimestre * 0.7
   const ssMonthlyBaseBase = ssBaseTributavelTrimestre > 0 ? (ssBaseTributavelTrimestre * 0.214) / 3 : 0
-  
-  // Apply contribution deviation (-25%, 0, +25%)
   const ssMonthlyContribution = ssMonthlyBaseBase * (1 + ssDeviation)
 
   // VAT calculations
@@ -154,16 +151,16 @@ export default function EstadoPage() {
       value: monthlyVat,
       description: 'Média mensal calculada com base no trimestre',
       icon: ArrowUpRight,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
+      color: 'text-[#55708C]', // Softer, less shocking steel blue
+      bg: 'bg-blue-50/50',
     },
     {
       label: 'Segurança Social (Mês)',
       value: ssMonthlyContribution,
       description: 'Contribuição mensal ajustada pelo desvio selecionado',
       icon: TrendingUp,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
+      color: 'text-gray-900', // unified clean colors
+      bg: 'bg-gray-50',
     },
     {
       label: 'Retenções na Fonte Efetuadas',
@@ -219,15 +216,21 @@ export default function EstadoPage() {
             Gestão do seu perfil de impostos e simulações progressivas de IRS
           </p>
         </div>
-        <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-md shadow-emerald-500/20">
-          <span className="text-white text-xl font-bold italic">R</span>
+        <div 
+          className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md"
+          style={{ 
+            backgroundColor: '#7DFABE',
+            boxShadow: '0 4px 6px -1px rgba(125, 250, 190, 0.2)' 
+          }}
+        >
+          <span className="text-[#1a1a2e] text-xl font-bold italic">R</span>
         </div>
       </div>
 
       {/* Tax Profile Configuration Panel */}
       <Card className="bg-white border-gray-200 shadow-sm p-6">
         <div className="flex items-center gap-2 mb-6">
-          <Sliders className="w-5 h-5 text-emerald-500" />
+          <Sliders className="w-5 h-5 text-gray-400" />
           <h2 className="text-lg font-bold text-gray-900">Configuração de Perfil Fiscal</h2>
         </div>
 
@@ -287,7 +290,8 @@ export default function EstadoPage() {
                 id="catA"
                 checked={trabalhoDependente}
                 onChange={(e) => setTrabalhoDependente(e.target.checked)}
-                className="w-4 h-4 text-emerald-500 rounded border-gray-300 focus:ring-emerald-400"
+                className="w-4 h-4 rounded border-gray-300 focus:ring-emerald-400"
+                style={{ color: '#7DFABE' }}
               />
               <Label htmlFor="catA" className="text-gray-700 font-medium cursor-pointer select-none">
                 Trabalho por Conta de Outrem em simultâneo
@@ -315,7 +319,11 @@ export default function EstadoPage() {
         <div className="flex justify-end mt-6">
           <Button 
             onClick={handleSaveProfile}
-            className="bg-[#4adeb5] hover:bg-[#39c79f] text-white font-semibold rounded-xl h-10 px-6 shadow-md shadow-[#4adeb5]/10"
+            className="text-[#1a1a2e] font-semibold rounded-xl h-10 px-6 shadow-md"
+            style={{ 
+              backgroundColor: '#7DFABE',
+              boxShadow: '0 4px 6px -1px rgba(125, 250, 190, 0.2)' 
+            }}
           >
             Gravar Dados do Perfil
           </Button>
@@ -348,7 +356,7 @@ export default function EstadoPage() {
       {/* Progressive IRS Simulator Block */}
       <Card className="bg-white border-gray-200 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-gray-150 flex items-center gap-2">
-          <Calculator className="w-5 h-5 text-emerald-500" />
+          <Calculator className="w-5 h-5 text-gray-400" />
           <h2 className="text-lg font-bold text-gray-900">Simulador de Contabilidade Progressiva (AT)</h2>
         </div>
 
@@ -371,11 +379,11 @@ export default function EstadoPage() {
                 )}
                 <div className="flex justify-between text-sm pt-3">
                   <span className="text-gray-500">Rendimento Tributável Simulado (Coeficiente 75%)</span>
-                  <span className="font-semibold text-emerald-600 font-mono">€{formatCurrency(irsResult.rendimentoTributavel)}</span>
+                  <span className="font-semibold font-mono" style={{ color: '#5cb896' }}>€{formatCurrency(irsResult.rendimentoTributavel)}</span>
                 </div>
                 <div className="flex justify-between text-sm pt-3">
                   <span className="text-gray-500">Dedução por Dependentes</span>
-                  <span className="font-semibold text-emerald-600 font-mono">€{formatCurrency(irsResult.deducoesDependentes)}</span>
+                  <span className="font-semibold font-mono" style={{ color: '#5cb896' }}>€{formatCurrency(irsResult.deducoesDependentes)}</span>
                 </div>
                 <div className="flex justify-between text-sm pt-3 border-t border-gray-200">
                   <span className="text-gray-900 font-medium">IRS Bruto Coleta</span>
@@ -404,11 +412,11 @@ export default function EstadoPage() {
             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <Info className="w-5 h-5 text-emerald-500" />
+                  <Info className="w-5 h-5 text-gray-400" />
                   <h4 className="text-sm font-bold text-gray-900">Validação de Despesas Declaradas</h4>
                 </div>
                 <p className="text-xs text-gray-500 leading-relaxed mb-4">
-                  A Autoridade Tributária exige a justificação de pelo menos 15% do seu rendimento em despesas de atividade para salvaguardar a dedução automática de 25%.
+                  A Autoridade Tributária exige a justificação de pelo menos 15% do seu rendimento in despesas de atividade para salvaguardar a dedução automática de 25%.
                 </p>
                 
                 <div className="space-y-3 mt-4 text-xs">
@@ -425,7 +433,7 @@ export default function EstadoPage() {
 
               <div className="mt-6 pt-4 border-t border-gray-200">
                 {expensesJustifiedDiff >= 0 ? (
-                  <div className="flex items-start gap-2 text-green-700 bg-green-55 p-3 rounded-xl">
+                  <div className="flex items-start gap-2 text-green-700 bg-green-50 p-3 rounded-xl">
                     <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />
                     <span className="text-xs font-medium">Situação regularizada! As suas despesas cobrem o patamar obrigatório do regime.</span>
                   </div>
@@ -444,7 +452,7 @@ export default function EstadoPage() {
       {/* Safety Social Quarterly Declaration Simulator */}
       <Card className="bg-white border-gray-200 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-gray-150 flex items-center gap-2">
-          <FileText className="w-5 h-5 text-emerald-500" />
+          <FileText className="w-5 h-5 text-gray-400" />
           <h2 className="text-lg font-bold text-gray-900">Simulador de Declaração Trimestral (Segurança Social Direta)</h2>
         </div>
         <CardContent className="p-6">
@@ -468,7 +476,8 @@ export default function EstadoPage() {
                   <button 
                     type="button" 
                     onClick={() => setSsDeviation(0)}
-                    className={`flex-1 h-9 rounded-lg text-xs font-bold border transition-all ${ssDeviation === 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-white text-gray-505 border-gray-200'}`}
+                    className={`flex-1 h-9 rounded-lg text-xs font-bold border transition-all ${ssDeviation === 0 ? 'text-gray-900 border-gray-300' : 'bg-white text-gray-505 border-gray-200'}`}
+                    style={{ backgroundColor: ssDeviation === 0 ? '#7DFABE' : 'white' }}
                   >
                     Base (0%)
                   </button>
@@ -485,7 +494,7 @@ export default function EstadoPage() {
 
             <div className="md:col-span-2 bg-gray-50 rounded-2xl p-6 border border-gray-200">
               <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider mb-4 flex items-center gap-1">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-500" />
+                <SlidersHorizontal className="w-3.5 h-3.5 text-gray-400" />
                 Valores para introduzir na Segurança Social Direta
               </h3>
 
@@ -500,7 +509,7 @@ export default function EstadoPage() {
                 </div>
                 <div className="bg-white p-4 rounded-xl border border-gray-150 text-center">
                   <span className="text-[10px] text-gray-400 font-bold block mb-1">Pagamento Mensal Final</span>
-                  <span className="text-lg font-extrabold text-emerald-600 font-mono">€{formatCurrency(ssMonthlyContribution)}</span>
+                  <span className="text-lg font-extrabold font-mono text-gray-900">€{formatCurrency(ssMonthlyContribution)}</span>
                 </div>
               </div>
 
@@ -532,14 +541,18 @@ export default function EstadoPage() {
                   onClick={() => setSelectedMonth(i)}
                   className={`text-center p-3 rounded-xl transition-all font-semibold text-xs border ${
                     isSelected
-                      ? 'bg-[#4adeb5] text-white border-[#4adeb5] shadow-md shadow-[#4adeb5]/20'
+                      ? 'text-[#1a1a2e] border-[#7DFABE] shadow-md'
                       : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
                   }`}
+                  style={{ 
+                    backgroundColor: isSelected ? '#7DFABE' : 'transparent',
+                    boxShadow: isSelected ? '0 4px 6px -1px rgba(125, 250, 190, 0.2)' : 'none'
+                  }}
                 >
                   <p>{month}</p>
                   {hasQuarterVat && (
                     <div className={`w-1.5 h-1.5 rounded-full mx-auto mt-1 ${
-                      isSelected ? 'bg-white' : 'bg-[#4adeb5]'
+                      isSelected ? 'bg-[#1a1a2e]' : 'bg-[#7DFABE]'
                     }`} />
                   )}
                 </button>

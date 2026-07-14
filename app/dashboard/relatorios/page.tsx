@@ -53,7 +53,7 @@ export default function RelatoriosPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: '#7DFABE', borderTopColor: 'transparent' }} />
           <p className="text-gray-400 text-sm">A carregar relatórios...</p>
         </div>
       </div>
@@ -100,7 +100,13 @@ export default function RelatoriosPage() {
           <Button variant="outline" className="border-gray-300 text-gray-700 rounded-xl h-10 gap-2 font-semibold">
             <FileSpreadsheet className="w-4 h-4" /> Exportar CSV
           </Button>
-          <Button className="bg-[#4adeb5] hover:bg-[#39c79f] text-white rounded-xl h-10 gap-2 shadow-md shadow-[#4adeb5]/10 font-semibold">
+          <Button 
+            className="text-[#1a1a2e] rounded-xl h-10 gap-2 shadow-md font-semibold"
+            style={{ 
+              backgroundColor: '#7DFABE',
+              boxShadow: '0 4px 6px -1px rgba(125, 250, 190, 0.2)' 
+            }}
+          >
             <Download className="w-4 h-4" /> Descarregar PDF
           </Button>
         </div>
@@ -115,11 +121,11 @@ export default function RelatoriosPage() {
           </div>
           <div className="flex items-center gap-4 text-xs font-semibold">
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-1.5 rounded bg-[#4adeb5]" />
+              <div className="w-3 h-1.5 rounded" style={{ backgroundColor: '#7DFABE' }} />
               <span className="text-gray-600">Rendimento Bruto</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-1.5 rounded bg-[#98ffd7]" />
+              <div className="w-3 h-1.5 rounded bg-gray-300" />
               <span className="text-gray-600">O Teu Dinheiro (Líquido)</span>
             </div>
           </div>
@@ -140,26 +146,26 @@ export default function RelatoriosPage() {
               </text>
             ))}
 
-            {/* Income line (Green) */}
+            {/* Income line */}
             <path
               d="M50,180 L165,160 L280,140 L395,110 L510,95 L625,70 L740,45"
               fill="none"
-              stroke="#4adeb5"
+              stroke="#7DFABE"
               strokeWidth="3.5"
               strokeLinecap="round"
             />
-            {/* Net money line (Light Green) */}
+            {/* Net money line */}
             <path
               d="M50,195 L165,180 L280,165 L395,140 L510,120 L625,95 L740,75"
               fill="none"
-              stroke="#a8ffd8"
-              strokeWidth="3.5"
+              stroke="#d1ffd9"
+              strokeWidth="3"
               strokeLinecap="round"
             />
 
             {/* Points */}
-            <circle cx="740" cy="45" r="5" fill="#4adeb5" />
-            <circle cx="740" cy="75" r="5" fill="#a8ffd8" />
+            <circle cx="740" cy="45" r="5" fill="#7DFABE" />
+            <circle cx="740" cy="75" r="5" fill="#d1ffd9" />
           </svg>
         </div>
       </Card>
@@ -171,7 +177,7 @@ export default function RelatoriosPage() {
         <Card className="bg-white border-gray-200 shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-emerald-500" />
+              <Briefcase className="w-5 h-5 text-gray-400" />
               <h2 className="text-lg font-bold text-gray-900">Distribuição por Cliente</h2>
             </div>
             <div className="group relative cursor-help">
@@ -187,20 +193,20 @@ export default function RelatoriosPage() {
             <div className="relative flex items-center justify-center">
               <svg width="160" height="160" viewBox="0 0 36 36" className="w-40 h-40">
                 <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f1f5f9" strokeWidth="3" />
-                {/* 35% Segment - Client 1 (emerald-400) */}
+                {/* 35% Segment - Client 1 (#7DFABE) */}
                 <circle 
                   cx="18" cy="18" r="15.915" 
                   fill="transparent" 
-                  stroke="#4adeb5" 
+                  stroke="#7DFABE" 
                   strokeWidth="3.2" 
                   strokeDasharray="35 65" 
                   strokeDashoffset="100" 
                 />
-                {/* 35% Segment - Client 2 (blue-600) */}
+                {/* 35% Segment - Client 2 (soft blue #55708C) */}
                 <circle 
                   cx="18" cy="18" r="15.915" 
                   fill="transparent" 
-                  stroke="#3b82f6" 
+                  stroke="#55708C" 
                   strokeWidth="3.2" 
                   strokeDasharray="35 65" 
                   strokeDashoffset="65" 
@@ -225,7 +231,7 @@ export default function RelatoriosPage() {
             {/* List Details with Legend Colors */}
             <div className="space-y-3">
               {clientData.map((client, i) => {
-                const legendColors = ['bg-[#4adeb5]', 'bg-blue-500', 'bg-purple-500']
+                const legendColors = ['bg-[#7DFABE]', 'bg-[#55708C]', 'bg-purple-500']
                 const colorClass = legendColors[i % legendColors.length]
                 return (
                   <div key={client.name} className="flex items-start gap-2.5">
@@ -250,7 +256,7 @@ export default function RelatoriosPage() {
         <Card className="bg-white border-gray-200 shadow-sm p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-6">
-              <TrendingUp className="w-5 h-5 text-emerald-500" />
+              <TrendingUp className="w-5 h-5 text-gray-450" />
               <h2 className="text-lg font-bold text-gray-900">Indicadores de Performance</h2>
             </div>
             
@@ -265,7 +271,7 @@ export default function RelatoriosPage() {
 
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-150">
                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Margem Líquida Real</p>
-                <p className="text-xl font-bold text-emerald-600 font-mono">
+                <p className="text-xl font-bold font-mono" style={{ color: '#5cb896' }}>
                   {split.totalMoneyIn > 0 ? Math.round((split.yourMoney / split.totalMoneyIn) * 100) : 0}%
                 </p>
                 <span className="text-[10px] text-gray-500">Percentagem livre para si</span>
@@ -273,7 +279,7 @@ export default function RelatoriosPage() {
 
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-150">
                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Carga Fiscal Média</p>
-                <p className="text-xl font-bold text-blue-600 font-mono">
+                <p className="text-xl font-bold text-[#55708C] font-mono">
                   {split.totalMoneyIn > 0 ? Math.round((split.stateMoney / split.totalMoneyIn) * 100) : 0}%
                 </p>
                 <span className="text-[10px] text-gray-500">Percentagem retida para impostos</span>
@@ -291,7 +297,7 @@ export default function RelatoriosPage() {
 
           <div className="border-t border-gray-100 pt-6 mt-6 text-xs text-gray-400 flex items-center justify-between">
             <span>Última atualização: Hoje</span>
-            <span className="text-[#4adeb5] font-semibold cursor-pointer hover:underline">Configurar alertas →</span>
+            <span className="font-semibold cursor-pointer hover:underline" style={{ color: '#5cb896' }}>Configurar alertas →</span>
           </div>
         </Card>
       </div>

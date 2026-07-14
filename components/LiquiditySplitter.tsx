@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { LiquiditySplit } from '@/types'
 import { formatCurrency } from '@/lib/calculations'
 import { Card } from '@/components/ui/card'
-import { Wallet, Landmark, ArrowRight } from 'lucide-react'
+import { Wallet, Landmark } from 'lucide-react'
 
 interface LiquiditySplitterProps {
   split: LiquiditySplit
@@ -63,21 +63,24 @@ export default function LiquiditySplitter({ split }: LiquiditySplitterProps) {
       {/* Main Split Visualization Card */}
       <Card className="relative overflow-hidden bg-white border border-gray-150 p-8 shadow-sm rounded-2xl">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-40 -left-40 w-96 h-96 bg-emerald-100/30 rounded-full blur-3xl" />
-          <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-50/40 rounded-full blur-3xl" />
+          <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#7DFABE]/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-[#55708C]/10 rounded-full blur-3xl" />
         </div>
 
         <div className="relative z-10 space-y-8">
           {/* Split Info Rows */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* O Seu Dinheiro */}
-            <div className="flex items-start gap-4 p-5 bg-gradient-to-br from-emerald-50/30 to-white border border-emerald-100/50 rounded-2xl">
-              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-md shadow-emerald-500/20 shrink-0">
-                <Wallet className="w-6 h-6" />
+            <div className="flex items-start gap-4 p-5 bg-gradient-to-br from-[#7DFABE]/5 to-white border border-[#7DFABE]/20 rounded-2xl">
+              <div 
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm"
+                style={{ backgroundColor: '#7DFABE' }}
+              >
+                <Wallet className="w-6 h-6 text-[#1a1a2e]" />
               </div>
               <div className="space-y-1">
                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">O Seu Dinheiro</span>
-                <p className="text-4xl font-extrabold text-emerald-600 font-mono tracking-tight">
+                <p className="text-4xl font-extrabold font-mono tracking-tight text-gray-900">
                   €{formatCurrency(animatedYourMoney)}
                 </p>
                 <p className="text-xs text-gray-500 font-medium">
@@ -87,17 +90,20 @@ export default function LiquiditySplitter({ split }: LiquiditySplitterProps) {
             </div>
 
             {/* O Estado */}
-            <div className="flex items-start gap-4 p-5 bg-gradient-to-br from-blue-50/20 to-white border border-blue-100/30 rounded-2xl">
-              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-blue-600/20 shrink-0">
-                <Landmark className="w-6 h-6" />
+            <div className="flex items-start gap-4 p-5 bg-gradient-to-br from-[#55708C]/5 to-white border border-[#55708C]/20 rounded-2xl">
+              <div 
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm"
+                style={{ backgroundColor: '#55708C' }}
+              >
+                <Landmark className="w-6 h-6 text-white" />
               </div>
               <div className="space-y-1">
                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">O Estado</span>
-                <p className="text-4xl font-extrabold text-blue-600 font-mono tracking-tight">
+                <p className="text-4xl font-extrabold font-mono tracking-tight text-gray-900">
                   €{formatCurrency(animatedStateMoney)}
                 </p>
-                <p className="text-xs text-gray-500 font-medium">
-                  {statePercentage}% reservados para IVA e IRS
+                <p className="text-xs text-[#55708C] font-semibold">
+                  {statePercentage}% reservados para IVA e IRS (Imposto Muted)
                 </p>
               </div>
             </div>
@@ -108,22 +114,28 @@ export default function LiquiditySplitter({ split }: LiquiditySplitterProps) {
             <div className="h-4 bg-gray-100 rounded-2xl overflow-hidden flex shadow-inner">
               {/* O Seu Dinheiro segment */}
               <div 
-                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-l-2xl transition-all duration-1000 ease-out"
-                style={{ width: mounted ? `${yourPercentage}%` : '0%' }}
+                className="h-full rounded-l-2xl transition-all duration-1000 ease-out"
+                style={{ 
+                  width: mounted ? `${yourPercentage}%` : '0%',
+                  backgroundColor: '#7DFABE'
+                }}
               />
               {/* O Estado segment */}
               <div 
-                className="h-full bg-gradient-to-r from-blue-600 to-blue-500 rounded-r-2xl transition-all duration-1000 ease-out"
-                style={{ width: mounted ? `${statePercentage}%` : '0%' }}
+                className="h-full rounded-r-2xl transition-all duration-1000 ease-out"
+                style={{ 
+                  width: mounted ? `${statePercentage}%` : '0%',
+                  backgroundColor: '#55708C'
+                }}
               />
             </div>
             
             {/* Split Info Labels */}
             <div className="flex justify-between text-xs font-bold text-gray-400 px-1 pt-1">
-              <span className="text-emerald-600 flex items-center gap-1">
+              <span className="flex items-center gap-1" style={{ color: '#7DFABE' }}>
                 {yourPercentage}% Livre
               </span>
-              <span className="text-blue-600 flex items-center gap-1">
+              <span className="flex items-center gap-1" style={{ color: '#55708C' }}>
                 Reservado {statePercentage}%
               </span>
             </div>

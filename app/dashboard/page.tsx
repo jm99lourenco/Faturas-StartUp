@@ -56,7 +56,7 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: '#7DFABE', borderTopColor: 'transparent' }} />
           <p className="text-gray-400 text-sm">A carregar o seu painel...</p>
         </div>
       </div>
@@ -67,7 +67,6 @@ export default function DashboardPage() {
   const alerts = profile ? generateTaxAlerts(invoices, profile) : []
   const recentInvoices = invoices.slice(0, 5)
 
-  // Simulated points for the Fluxo de Caixa Mensal SVG Line Chart (matching layout)
   const chartPoints = [
     { x: 50, y: 170, label: 'Jan' },
     { x: 150, y: 160, label: 'Fev' },
@@ -83,8 +82,8 @@ export default function DashboardPage() {
       label: 'Total Recebido',
       value: split.totalMoneyIn,
       icon: ArrowDownLeft,
-      color: 'text-green-600',
-      bg: 'bg-green-50',
+      color: 'text-gray-700',
+      bg: 'bg-gray-50',
     },
     {
       label: 'Total Despesas',
@@ -97,8 +96,8 @@ export default function DashboardPage() {
       label: 'IVA Cobrado',
       value: split.totalVatCollected,
       icon: Receipt,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
+      color: 'text-[#55708C]', // Muted less shocking state blue
+      bg: 'bg-blue-50/50',
     },
     {
       label: 'Retenção na Fonte',
@@ -121,8 +120,14 @@ export default function DashboardPage() {
             Resumo das suas finanças
           </p>
         </div>
-        <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-md shadow-emerald-500/20">
-          <span className="text-white text-xl font-bold italic">R</span>
+        <div 
+          className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md"
+          style={{ 
+            backgroundColor: '#7DFABE',
+            boxShadow: '0 4px 6px -1px rgba(125, 250, 190, 0.2)' 
+          }}
+        >
+          <span className="text-[#1a1a2e] text-xl font-bold italic">R</span>
         </div>
       </div>
 
@@ -140,7 +145,13 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-400">Rendimentos acumulados vs despesas justificadas</p>
           </div>
           <Link href="/dashboard/faturas">
-            <Button className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold h-11 px-6 rounded-xl shadow-md shadow-emerald-500/20 gap-2 w-full sm:w-auto">
+            <Button 
+              className="text-[#1a1a2e] font-semibold h-11 px-6 rounded-xl gap-2 w-full sm:w-auto shadow-md"
+              style={{ 
+                backgroundColor: '#7DFABE',
+                boxShadow: '0 4px 6px -1px rgba(125, 250, 190, 0.2)'
+              }}
+            >
               <Plus className="w-4 h-4" /> Adicionar Entrada Manual
             </Button>
           </Link>
@@ -164,14 +175,14 @@ export default function DashboardPage() {
             <path
               d="M50,170 C100,165 150,160 250,155 C350,140 450,110 550,90 C600,80 650,70 650,70"
               fill="none"
-              stroke="#10b981"
-              strokeWidth="3"
+              stroke="#7DFABE"
+              strokeWidth="3.5"
               strokeLinecap="round"
             />
 
             {/* Chart dots */}
             {chartPoints.map((pt, i) => (
-              <circle key={i} cx={pt.x} cy={pt.y} r="4" fill="#10b981" />
+              <circle key={i} cx={pt.x} cy={pt.y} r="4" fill="#7DFABE" />
             ))}
           </svg>
         </div>
@@ -205,7 +216,8 @@ export default function DashboardPage() {
           <h2 className="text-lg font-semibold text-gray-900">Faturas Recentes</h2>
           <Link
             href="/dashboard/faturas"
-            className="text-sm text-emerald-600 hover:text-emerald-700 transition-colors font-medium"
+            className="text-sm font-semibold transition-colors"
+            style={{ color: '#5cb896' }}
           >
             Ver todas →
           </Link>
@@ -218,7 +230,8 @@ export default function DashboardPage() {
               <p className="text-gray-500 text-sm">Ainda não tem faturas</p>
               <Link
                 href="/dashboard/faturas"
-                className="text-sm text-emerald-600 hover:text-emerald-700 mt-2 inline-block font-medium"
+                className="text-sm mt-2 inline-block font-semibold"
+                style={{ color: '#5cb896' }}
               >
                 Adicionar primeira fatura →
               </Link>

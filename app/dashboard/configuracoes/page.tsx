@@ -35,8 +35,14 @@ export default function ConfigsPage() {
             Gira os dados da sua empresa e conexões a integrações externas
           </p>
         </div>
-        <div className="w-12 h-12 bg-emerald-400 rounded-2xl flex items-center justify-center shadow-md shadow-emerald-400/20">
-          <span className="text-white text-xl font-bold italic">R</span>
+        <div 
+          className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md"
+          style={{ 
+            backgroundColor: '#7DFABE',
+            boxShadow: '0 4px 6px -1px rgba(125, 250, 190, 0.2)' 
+          }}
+        >
+          <span className="text-[#1a1a2e] text-xl font-bold italic">R</span>
         </div>
       </div>
 
@@ -45,7 +51,7 @@ export default function ConfigsPage() {
         <div className="lg:col-span-2 space-y-6">
           <Card className="bg-white border-gray-200 shadow-sm p-6">
             <div className="flex items-center gap-2 mb-6">
-              <Sliders className="w-5 h-5 text-emerald-500" />
+              <Sliders className="w-5 h-5" style={{ color: '#5cb896' }} />
               <h2 className="text-lg font-bold text-gray-900">Perfil da Empresa</h2>
             </div>
 
@@ -79,7 +85,13 @@ export default function ConfigsPage() {
               </div>
 
               <div className="flex justify-end pt-4">
-                <Button className="bg-[#4adeb5] hover:bg-[#39c79f] text-white font-semibold rounded-xl h-11 px-6 shadow-md shadow-[#4adeb5]/20">
+                <Button 
+                  className="text-[#1a1a2e] font-semibold rounded-xl h-11 px-6 shadow-md"
+                  style={{ 
+                    backgroundColor: '#7DFABE',
+                    boxShadow: '0 4px 6px -1px rgba(125, 250, 190, 0.2)' 
+                  }}
+                >
                   Gravar Alterações
                 </Button>
               </div>
@@ -89,7 +101,7 @@ export default function ConfigsPage() {
           {/* Security & Compliance Info Card */}
           <Card className="bg-white border-gray-200 shadow-sm p-6">
             <div className="flex items-start gap-3">
-              <Shield className="w-6 h-6 text-emerald-500 shrink-0 mt-0.5" />
+              <Shield className="w-6 h-6 shrink-0 mt-0.5" style={{ color: '#5cb896' }} />
               <div>
                 <h3 className="text-sm font-bold text-gray-900">Segurança de Dados & RGPD</h3>
                 <p className="text-xs text-gray-500 leading-relaxed mt-2">
@@ -104,7 +116,7 @@ export default function ConfigsPage() {
         <div className="lg:col-span-1 space-y-6">
           <Card className="bg-white border-gray-200 shadow-sm p-6 space-y-6">
             <div className="flex items-center gap-2">
-              <Link2 className="w-5 h-5 text-emerald-500" />
+              <Link2 className="w-5 h-5" style={{ color: '#5cb896' }} />
               <h2 className="text-lg font-bold text-gray-900">Integrações Oficiais</h2>
             </div>
 
@@ -153,7 +165,10 @@ export default function ConfigsPage() {
                   <Button 
                     onClick={handleConnectBank} 
                     disabled={connectingBank}
-                    className="w-full bg-[#4adeb5] hover:bg-[#39c79f] text-white font-semibold text-xs h-9 rounded-lg gap-2"
+                    className="w-full text-[#1a1a2e] font-semibold text-xs h-9 rounded-lg gap-2 shadow-sm"
+                    style={{ 
+                      backgroundColor: '#7DFABE',
+                    }}
                   >
                     <Landmark className="w-3.5 h-3.5" /> 
                     {connectingBank ? 'A autenticar...' : 'Ligar via Nordigen (PSD2)'}

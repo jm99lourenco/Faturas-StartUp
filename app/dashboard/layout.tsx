@@ -16,7 +16,6 @@ import {
   Menu,
 } from 'lucide-react'
 
-// Settings link removed from the main sidebar items list
 const sidebarItems = [
   { label: 'Início', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Faturas', href: '/dashboard/faturas', icon: FileText },
@@ -35,10 +34,16 @@ function SidebarContent({
 }) {
   return (
     <div className="flex flex-col h-full bg-white">
-      {/* Brand logo: Modern "R" symbol in green */}
+      {/* Brand logo: Modern "R" symbol in green #7DFABE */}
       <div className="p-6 flex flex-col items-center">
-        <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 mb-2">
-          <span className="text-white text-3xl font-extrabold italic tracking-tighter">R</span>
+        <div 
+          className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg mb-2"
+          style={{ 
+            backgroundColor: '#7DFABE',
+            boxShadow: '0 10px 15px -3px rgba(125, 250, 190, 0.3)'
+          }}
+        >
+          <span className="text-[#1a1a2e] text-3xl font-extrabold italic tracking-tighter">R</span>
         </div>
         <span className="text-sm font-bold text-gray-900 tracking-tight">Reqibo</span>
       </div>
@@ -52,13 +57,13 @@ function SidebarContent({
             <button
               key={item.href}
               onClick={() => onNavigate(item.href)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                isActive
-                  ? 'bg-emerald-50 text-emerald-600'
-                  : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
-              }`}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200"
+              style={{
+                backgroundColor: isActive ? '#7DFABE20' : 'transparent',
+                color: isActive ? '#5cb896' : '#6b7280', // slightly darker green for readability on light text
+              }}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-5 h-5" style={{ color: isActive ? '#5cb896' : '#6b7280' }} />
               {item.label}
             </button>
           )
@@ -71,11 +76,11 @@ function SidebarContent({
       <div className="p-3 space-y-1">
         <button
           onClick={() => onNavigate('/dashboard/configuracoes')}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
-            pathname === '/dashboard/configuracoes'
-              ? 'bg-emerald-50 text-emerald-600'
-              : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
-          }`}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200"
+          style={{
+            backgroundColor: pathname === '/dashboard/configuracoes' ? '#7DFABE20' : 'transparent',
+            color: pathname === '/dashboard/configuracoes' ? '#5cb896' : '#6b7280',
+          }}
         >
           <Settings className="w-5 h-5" />
           Configurações
@@ -150,8 +155,8 @@ export default function DashboardLayout({
             </Sheet>
 
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-emerald-500 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold italic">R</span>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#7DFABE' }}>
+                <span className="text-[#1a1a2e] text-sm font-bold italic">R</span>
               </div>
               <span className="text-lg font-bold text-gray-900">Reqibo</span>
             </div>
