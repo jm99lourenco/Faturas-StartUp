@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { DEMO_MODE } from '@/lib/demo-data'
+import { getLocalClients, saveLocalClients, getLocalEntities, saveLocalEntities } from '@/lib/localStorage'
 import { Users, Building, Plus, Trash2, CheckCircle } from 'lucide-react'
 
 // Demo data for clients and entities
@@ -96,8 +97,8 @@ export default function ClientesPage() {
 
   const loadData = useCallback(async () => {
     if (DEMO_MODE) {
-      setClients(DEMO_CLIENTS)
-      setEntities(DEMO_ENTITIES)
+      setClients(getLocalClients())
+      setEntities(getLocalEntities())
       setLoading(false)
       return
     }
@@ -140,7 +141,9 @@ export default function ClientesPage() {
     }
 
     if (DEMO_MODE) {
-      setClients((prev) => [...prev, newClient])
+      const updated = [...clients, newClient]
+      setClients(updated)
+      saveLocalClients(updated)
     } else {
       try {
         const { createClient } = await import('@/lib/supabase/client')
@@ -185,7 +188,9 @@ export default function ClientesPage() {
     }
 
     if (DEMO_MODE) {
-      setEntities((prev) => [...prev, newEntity])
+      const updated = [...entities, newEntity]
+      setEntities(updated)
+      saveLocalEntities(updated)
     } else {
       try {
         const { createClient } = await import('@/lib/supabase/client')
@@ -218,7 +223,9 @@ export default function ClientesPage() {
   const handleDeleteClient = async (id: string) => {
     if (!confirm('Eliminar este cliente?')) return
     if (DEMO_MODE) {
-      setClients((prev) => prev.filter((c) => c.id !== id))
+      const updated = clients.filter((c) => c.id !== id)
+      setClients(updated)
+      saveLocalClients(updated)
       return
     }
     try {
@@ -235,7 +242,9 @@ export default function ClientesPage() {
   const handleDeleteEntity = async (id: string) => {
     if (!confirm('Eliminar esta entidade?')) return
     if (DEMO_MODE) {
-      setEntities((prev) => prev.filter((e) => e.id !== id))
+      const updated = entities.filter((e) => e.id !== id)
+      setEntities(updated)
+      saveLocalEntities(updated)
       return
     }
     try {

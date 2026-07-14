@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Invoice } from '@/types'
 import { formatCurrency, calculateLiquiditySplit, calculateProgressiveIRS } from '@/lib/calculations'
-import { DEMO_MODE, DEMO_INVOICES } from '@/lib/demo-data'
+import { DEMO_MODE } from '@/lib/demo-data'
+import { getLocalInvoices, getLocalProfile, saveLocalProfile } from '@/lib/localStorage'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -48,7 +49,14 @@ export default function EstadoPage() {
 
   const loadData = useCallback(async () => {
     if (DEMO_MODE) {
-      setInvoices(DEMO_INVOICES)
+      const p = getLocalProfile()
+      setDependentes(p.dependentes ?? 0)
+      setEstadoCivil(p.estado_civil ?? 'solteiro')
+      setTrabalhoDependente(p.trabalho_dependente ?? false)
+      setRendimentoCatA(String(p.rendimento_dependente_anual ?? 0))
+      setRegiao(p.regiao ?? 'continente')
+      
+      setInvoices(getLocalInvoices())
       setLoading(false)
       return
     }
@@ -84,7 +92,17 @@ export default function EstadoPage() {
 
   const handleSaveProfile = async () => {
     if (DEMO_MODE) {
-      alert('Perfil de Simulação atualizado com sucesso!')
+      const p = getLocalProfile()
+      const updatedProfile = {
+        ...p,
+        dependentes,
+        estado_civil: estadoCivil,
+        trabalho_dependente: trabalhoDependente,
+        rendimento_dependente_anual: parseFloat(rendimentoCatA) || 0,
+        regiao
+      }
+      saveLocalProfile(updatedProfile)
+      alert('Perfil de Simulação atualizado e guardado localmente!')
       return
     }
     try {

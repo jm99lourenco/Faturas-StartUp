@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { Invoice, Profile } from '@/types'
 import { formatCurrency } from '@/lib/calculations'
-import { DEMO_MODE, DEMO_INVOICES, DEMO_PROFILE } from '@/lib/demo-data'
+import { DEMO_MODE } from '@/lib/demo-data'
+import { getLocalInvoices, saveLocalInvoices, getLocalProfile } from '@/lib/localStorage'
 import { calculateVatAmount, calculateWithholding, calculateInvoiceTotal } from '@/lib/calculations'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -73,8 +74,8 @@ export default function FaturasPage() {
 
   const loadData = useCallback(async () => {
     if (DEMO_MODE) {
-      setProfile(DEMO_PROFILE)
-      setInvoices((prev) => (prev.length > 0 ? prev : DEMO_INVOICES))
+      setProfile(getLocalProfile())
+      setInvoices(getLocalInvoices())
       setLoading(false)
       return
     }
@@ -197,8 +198,9 @@ export default function FaturasPage() {
     }
 
     if (DEMO_MODE) {
-      DEMO_INVOICES.unshift(newInvoice)
-      setInvoices([newInvoice, ...invoices])
+      const updated = [newInvoice, ...invoices]
+      setInvoices(updated)
+      saveLocalInvoices(updated)
     } else {
       try {
         const { createClient } = await import('@/lib/supabase/client')
@@ -242,8 +244,9 @@ export default function FaturasPage() {
     }
 
     if (DEMO_MODE) {
-      DEMO_INVOICES.unshift(newInvoice)
-      setInvoices([newInvoice, ...invoices])
+      const updated = [newInvoice, ...invoices]
+      setInvoices(updated)
+      saveLocalInvoices(updated)
     } else {
       try {
         const { createClient } = await import('@/lib/supabase/client')
@@ -273,7 +276,9 @@ export default function FaturasPage() {
     if (!confirm('Eliminar esta fatura?')) return
     setDeleting(id)
     if (DEMO_MODE) {
-      setInvoices((prev) => prev.filter((inv) => inv.id !== id))
+      const updated = invoices.filter((inv) => inv.id !== id)
+      setInvoices(updated)
+      saveLocalInvoices(updated)
       setDeleting(null)
       return
     }

@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Invoice } from '@/types'
 import { formatCurrency, calculateLiquiditySplit } from '@/lib/calculations'
-import { DEMO_MODE, DEMO_INVOICES } from '@/lib/demo-data'
+import { DEMO_MODE } from '@/lib/demo-data'
+import { getLocalInvoices } from '@/lib/localStorage'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
@@ -23,7 +24,7 @@ export default function RelatoriosPage() {
 
   const loadData = useCallback(async () => {
     if (DEMO_MODE) {
-      setInvoices(DEMO_INVOICES)
+      setInvoices(getLocalInvoices())
       setLoading(false)
       return
     }

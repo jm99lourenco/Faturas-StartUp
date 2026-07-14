@@ -19,7 +19,8 @@ import {
   MapPin
 } from 'lucide-react'
 import Link from 'next/link'
-import { DEMO_MODE, DEMO_INVOICES, DEMO_PROFILE } from '@/lib/demo-data'
+import { DEMO_MODE } from '@/lib/demo-data'
+import { getLocalInvoices, getLocalProfile, getLocalEntities } from '@/lib/localStorage'
 
 export default function DashboardPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
@@ -28,8 +29,8 @@ export default function DashboardPage() {
 
   const loadData = useCallback(async () => {
     if (DEMO_MODE) {
-      setProfile(DEMO_PROFILE)
-      setInvoices(DEMO_INVOICES)
+      setProfile(getLocalProfile())
+      setInvoices(getLocalInvoices())
       setLoading(false)
       return
     }
@@ -67,7 +68,7 @@ export default function DashboardPage() {
   }
 
   // RUN DYNAMIC TAX CALCULATION ENGINE
-  const defaultProfile: Profile = profile || DEMO_PROFILE
+  const defaultProfile: Profile = profile || getLocalProfile()
   const taxResults = calculateTaxes(defaultProfile, invoices)
 
   // Map result to LiquiditySplitter format
@@ -97,15 +98,25 @@ export default function DashboardPage() {
     .sort((a, b) => b.total - a.total)
     .slice(0, 3)
 
-  // KPI Integration: Group sales by Location (simulated parsing of addresses)
-  // Maps specific client names to regions/cities for display
-  const clientLocations: { [key: string]: string } = {
-    'Empresa ABC, Lda.': 'Lisboa',
-    'StartupXYZ': 'Porto',
-    'Consultora Digital': 'Braga',
-    'Grupo Ferreira & Associados': 'Coimbra',
-    'Tech Solutions Porto': 'Porto',
-    'Google Ireland Limited': 'Estrangeiro (Irlanda)'
+  // KPI Integration: Group sales by Location (parsing address field of Entities)
+  const clientLocations: { [key: string]: string } = {}
+  
+  // Pre-seed locations for demo faturas
+  clientLocations['Empresa ABC, Lda.'] = 'Lisboa'
+  clientLocations['StartupXYZ, S.A.'] = 'Porto'
+  clientLocations['Grupo Ferreira & Associados'] = 'Coimbra'
+  clientLocations['Adobe Creative Cloud'] = 'Estrangeiro (Irlanda)'
+  clientLocations['WeWork Lisboa'] = 'Lisboa'
+
+  if (typeof window !== 'undefined') {
+    const localEntities = getLocalEntities()
+    localEntities.forEach((ent) => {
+      if (ent.address) {
+        const parts = ent.address.split(',')
+        const city = parts[parts.length - 1].trim()
+        clientLocations[ent.name] = city
+      }
+    })
   }
 
   const locationTotals: { [key: string]: number } = {}
