@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Trash2, CheckCircle, Clock } from 'lucide-react'
+import { Trash2, CheckCircle, Clock, Upload, Sparkles, RefreshCw } from 'lucide-react'
 
 export default function FaturasPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
@@ -41,6 +41,11 @@ export default function FaturasPage() {
   const [retencao, setRetencao] = useState('25')
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
+
+  // Scan simulation state
+  const [scanning, setScanning] = useState(false)
+  const [scanStep, setScanStep] = useState('')
+  const [scanSuccess, setScanSuccess] = useState(false)
 
   // Live calculations
   const baseAmount = parseFloat(valorBase) || 0
@@ -78,6 +83,32 @@ export default function FaturasPage() {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  // Simulation of OCR file scan
+  const handleScanSimulation = () => {
+    setScanning(true)
+    setScanSuccess(false)
+    setScanStep('A ler ficheiro PDF/Imagem...')
+    
+    setTimeout(() => {
+      setScanStep('A extrair dados com IA (NIF, Valores, Taxas)...')
+      setTimeout(() => {
+        setScanStep('A preencher formulário de fatura...')
+        setTimeout(() => {
+          // Set mock extracted values
+          setEntidade('Google Ireland Limited')
+          setValorBase('3000')
+          setTaxaIva('23')
+          setRetencao('25')
+          setDataEmissao('2026-07-12')
+          
+          setScanning(false)
+          setScanSuccess(true)
+          setTimeout(() => setScanSuccess(false), 4000)
+        }, 800)
+      }, 1000)
+    }, 1000)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -172,104 +203,185 @@ export default function FaturasPage() {
         </div>
       </div>
 
-      {/* Invoice Form */}
-      <Card className="bg-white border-gray-200 shadow-sm p-6">
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {/* Entidade */}
-            <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Entidade Client/Fornecedor</Label>
-              <Input
-                placeholder="Nome da entidade"
-                value={entidade}
-                onChange={(e) => setEntidade(e.target.value)}
-                required
-                className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/20 h-11"
-              />
+      {/* AI OCR Reader & Form */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Left: AI OCR Drag and Drop */}
+        <Card className="lg:col-span-1 bg-white border-gray-200 shadow-sm p-6 flex flex-col justify-between min-h-[300px] relative overflow-hidden">
+          {scanning && (
+            <div className="absolute inset-0 bg-white/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-6 text-center">
+              <RefreshCw className="w-8 h-8 text-blue-600 animate-spin mb-4" />
+              <p className="text-sm font-semibold text-gray-900 mb-1">{scanStep}</p>
+              <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden mt-3 max-w-[200px]">
+                <div className="bg-blue-600 h-full animate-[loading_3.5s_ease-in-out_infinite]" style={{ width: '60%' }} />
+              </div>
             </div>
+          )}
 
-            {/* Data de Emissão */}
-            <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Data de Emissão</Label>
-              <Input
-                type="date"
-                value={dataEmissao}
-                onChange={(e) => setDataEmissao(e.target.value)}
-                required
-                className="bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 h-11"
-              />
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="w-5 h-5 text-blue-600" />
+              <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Digitalização por IA</h2>
+            </div>
+            <p className="text-xs text-gray-500 mb-6">
+              Arraste a sua fatura ou carregue uma fotografia para a nossa IA ler os campos de forma automática.
+            </p>
+            
+            <div 
+              onClick={handleScanSimulation}
+              className="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-2xl p-8 text-center cursor-pointer transition-all bg-gray-50 hover:bg-blue-50/10 flex flex-col items-center justify-center group"
+            >
+              <Upload className="w-10 h-10 text-gray-400 group-hover:text-blue-500 transition-colors mb-3" />
+              <span className="text-sm font-semibold text-gray-800">Carregar Fotografia</span>
+              <span className="text-xs text-gray-400 mt-1">PDF, PNG, JPG (Max 5MB)</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            {/* Valor Base */}
-            <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Valor Base (€)</Label>
-              <div className="relative">
+          <div className="mt-6">
+            {scanSuccess && (
+              <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded-xl text-xs flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 shrink-0 text-green-600" />
+                <span>Dados extraídos! Reveja os campos inseridos no formulário ao lado.</span>
+              </div>
+            )}
+            <Button 
+              onClick={handleScanSimulation} 
+              variant="outline" 
+              className="w-full border-blue-200 text-blue-600 hover:bg-blue-50 h-11 rounded-xl mt-3 font-semibold"
+            >
+              Simular Leitura IA (Demo)
+            </Button>
+          </div>
+        </Card>
+
+        {/* Right: Manual & Populated Form */}
+        <Card className="lg:col-span-2 bg-white border-gray-200 shadow-sm p-6">
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Entidade */}
+              <div className="space-y-2">
+                <Label className="text-gray-700 font-medium">Entidade Client/Fornecedor</Label>
                 <Input
-                  type="number"
-                  placeholder="0.00"
-                  value={valorBase}
-                  onChange={(e) => setValorBase(e.target.value)}
+                  placeholder="Nome da entidade"
+                  value={entidade}
+                  onChange={(e) => setEntidade(e.target.value)}
                   required
-                  min="0.01"
-                  step="0.01"
-                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/20 h-11 pr-10 font-mono"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/20 h-11"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">€</span>
+              </div>
+
+              {/* Data de Emissão */}
+              <div className="space-y-2">
+                <Label className="text-gray-700 font-medium">Data de Emissão</Label>
+                <Input
+                  type="date"
+                  value={dataEmissao}
+                  onChange={(e) => setDataEmissao(e.target.value)}
+                  required
+                  className="bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 h-11"
+                />
               </div>
             </div>
 
-            {/* Taxa de IVA */}
-            <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Taxa de IVA</Label>
-              <Select value={taxaIva} onValueChange={(v) => v && setTaxaIva(v)}>
-                <SelectTrigger className="bg-white border-gray-300 text-gray-900 h-11">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-gray-200">
-                  <SelectItem value="0" className="text-gray-900">Isento</SelectItem>
-                  <SelectItem value="6" className="text-gray-900">6%</SelectItem>
-                  <SelectItem value="13" className="text-gray-900">13%</SelectItem>
-                  <SelectItem value="23" className="text-gray-900">23%</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              {/* Valor Base */}
+              <div className="space-y-2">
+                <Label className="text-gray-700 font-medium">Valor Base (€)</Label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    placeholder="0.00"
+                    value={valorBase}
+                    onChange={(e) => setValorBase(e.target.value)}
+                    required
+                    min="0.01"
+                    step="0.01"
+                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/20 h-11 pr-10 font-mono"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">€</span>
+                </div>
+              </div>
+
+              {/* Taxa de IVA */}
+              <div className="space-y-2">
+                <Label className="text-gray-700 font-medium">Taxa de IVA</Label>
+                <Select value={taxaIva} onValueChange={(v) => v && setTaxaIva(v)}>
+                  <SelectTrigger className="bg-white border-gray-300 text-gray-900 h-11">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-200">
+                    <SelectItem value="0" className="text-gray-900">Isento</SelectItem>
+                    <SelectItem value="6" className="text-gray-900">6%</SelectItem>
+                    <SelectItem value="13" className="text-gray-900">13%</SelectItem>
+                    <SelectItem value="23" className="text-gray-900">23%</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Retenção na Fonte */}
+              <div className="space-y-2">
+                <Label className="text-gray-700 font-medium">Retenção na Fonte</Label>
+                <Select value={retencao} onValueChange={(v) => v && setRetencao(v)}>
+                  <SelectTrigger className="bg-white border-gray-300 text-gray-900 h-11">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-200">
+                    <SelectItem value="0" className="text-gray-900">0%</SelectItem>
+                    <SelectItem value="11.5" className="text-gray-900">11.5%</SelectItem>
+                    <SelectItem value="16.5" className="text-gray-900">16.5%</SelectItem>
+                    <SelectItem value="25" className="text-gray-900">25%</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Retenção na Fonte */}
-            <div className="space-y-2">
-              <Label className="text-gray-700 font-medium">Retenção na Fonte</Label>
-              <Select value={retencao} onValueChange={(v) => v && setRetencao(v)}>
-                <SelectTrigger className="bg-white border-gray-300 text-gray-900 h-11">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-gray-200">
-                  <SelectItem value="0" className="text-gray-900">0%</SelectItem>
-                  <SelectItem value="11.5" className="text-gray-900">11.5%</SelectItem>
-                  <SelectItem value="16.5" className="text-gray-900">16.5%</SelectItem>
-                  <SelectItem value="25" className="text-gray-900">25%</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Submit */}
-          <div className="flex items-center justify-end gap-4">
-            {success && (
-              <span className="text-green-600 text-sm flex items-center gap-1">
-                <CheckCircle className="w-4 h-4" /> Fatura gravada com sucesso!
-              </span>
+            {/* Live Calculation Preview */}
+            {baseAmount > 0 && (
+              <div className="bg-gray-50 rounded-xl p-4 space-y-2 border border-gray-200 mb-6">
+                <p className="text-xs text-gray-400 uppercase tracking-wider mb-2 font-semibold">Resumo dos Valores</p>
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Valor Base</span>
+                  <span className="font-mono">€{formatCurrency(baseAmount)}</span>
+                </div>
+                {vatAmount > 0 && (
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>IVA ({taxaIva}%)</span>
+                    <span className="text-blue-600 font-mono">+ €{formatCurrency(vatAmount)}</span>
+                  </div>
+                )}
+                {withholdingAmount > 0 && (
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Retenção ({retencao}%)</span>
+                    <span className="text-red-500 font-mono">- €{formatCurrency(withholdingAmount)}</span>
+                  </div>
+                )}
+                <div className="border-t border-gray-250 pt-2 mt-2">
+                  <div className="flex justify-between text-sm font-bold text-gray-900">
+                    <span>Total a Receber</span>
+                    <span className="text-green-600 font-mono">€{formatCurrency(totalAmount)}</span>
+                  </div>
+                </div>
+              </div>
             )}
-            <Button
-              type="submit"
-              disabled={submitting || !entidade || !valorBase}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 h-11 rounded-xl shadow-md shadow-blue-600/20 transition-all duration-200"
-            >
-              {submitting ? 'A gravar...' : 'Validar e Gravar Fatura'}
-            </Button>
-          </div>
-        </form>
-      </Card>
+
+            {/* Submit */}
+            <div className="flex items-center justify-end gap-4">
+              {success && (
+                <span className="text-green-600 text-sm flex items-center gap-1 font-semibold">
+                  <CheckCircle className="w-4 h-4" /> Fatura gravada com sucesso!
+                </span>
+              )}
+              <Button
+                type="submit"
+                disabled={submitting || !entidade || !valorBase}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 h-11 rounded-xl shadow-md shadow-blue-600/20 transition-all duration-200"
+              >
+                {submitting ? 'A gravar...' : 'Validar e Gravar Fatura'}
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </div>
 
       {/* Invoice Table */}
       <Card className="bg-white border-gray-200 shadow-sm overflow-hidden">
@@ -318,23 +430,10 @@ export default function FaturasPage() {
                     <TableCell className="text-center">
                       <Badge
                         variant="outline"
-                        className={`text-xs gap-1 ${
-                          Math.random() > 0.3
-                            ? 'text-green-700 border-green-200 bg-green-50'
-                            : 'text-amber-700 border-amber-200 bg-amber-50'
-                        }`}
+                        className="text-xs gap-1 text-green-700 border-green-200 bg-green-50"
                       >
-                        {Math.random() > 0.3 ? (
-                          <>
-                            <CheckCircle className="w-3 h-3" />
-                            Processado
-                          </>
-                        ) : (
-                          <>
-                            <Clock className="w-3 h-3" />
-                            Pendente
-                          </>
-                        )}
+                        <CheckCircle className="w-3 h-3" />
+                        Processado
                       </Badge>
                     </TableCell>
                     <TableCell>

@@ -14,7 +14,6 @@ import {
   Settings,
   LogOut,
   Menu,
-  User,
 } from 'lucide-react'
 
 const sidebarItems = [
@@ -25,21 +24,17 @@ const sidebarItems = [
   { label: 'Configurações', href: '/dashboard/configuracoes', icon: Settings },
 ]
 
-const topNavItems = [
-  { label: 'Seu Saldo', href: '/dashboard' },
-  { label: 'Faturas', href: '/dashboard/faturas' },
-  { label: 'Perfil', href: '/dashboard/configuracoes' },
-]
-
 function SidebarContent({
   pathname,
   onNavigate,
+  onLogout,
 }: {
   pathname: string
   onNavigate: (href: string) => void
+  onLogout: () => void
 }) {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white">
       {/* Logo */}
       <div className="p-6 flex justify-center">
         <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
@@ -56,10 +51,10 @@ function SidebarContent({
             <button
               key={item.href}
               onClick={() => onNavigate(item.href)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                  : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
               }`}
             >
               <Icon className="w-5 h-5" />
@@ -69,16 +64,23 @@ function SidebarContent({
         })}
       </nav>
 
-      <Separator className="bg-gray-200 mx-3" />
+      <Separator className="bg-gray-100 mx-3" />
 
-      {/* Bottom: Configurações duplicate */}
-      <div className="p-3">
+      {/* Bottom Actions */}
+      <div className="p-3 space-y-1">
         <button
           onClick={() => onNavigate('/dashboard/configuracoes')}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-all duration-200"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-all duration-200"
         >
           <Settings className="w-5 h-5" />
           Configurações
+        </button>
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all duration-200"
+        >
+          <LogOut className="w-5 h-5" />
+          Sair
         </button>
       </div>
     </div>
@@ -90,37 +92,9 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const [businessName, setBusinessName] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
-
-  useEffect(() => {
-    async function loadProfile() {
-      if (DEMO_MODE) {
-        setBusinessName(DEMO_PROFILE.business_name || '')
-        return
-      }
-      try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          const { data } = await supabase
-            .from('profiles')
-            .select('business_name')
-            .eq('id', user.id)
-            .single()
-          if (data?.business_name) {
-            setBusinessName(data.business_name)
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load profile:', err)
-      }
-    }
-    loadProfile()
-  }, [])
 
   const handleNavigate = (href: string) => {
     router.push(href)
@@ -144,74 +118,40 @@ export default function DashboardLayout({
         <SidebarContent
           pathname={pathname}
           onNavigate={handleNavigate}
+          onLogout={handleLogout}
         />
       </aside>
 
       {/* Main area */}
       <div className="flex-1 lg:pl-48 flex flex-col">
-        {/* Top Navigation Bar */}
-        <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
-          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-14">
-            {/* Left: Brand name (desktop) + mobile hamburger */}
-            <div className="flex items-center gap-4">
-              {/* Mobile hamburger */}
-              <div className="lg:hidden">
-                <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-                  <SheetTrigger
-                    render={
-                      <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-800" />
-                    }
-                  >
-                    <Menu className="w-5 h-5" />
-                  </SheetTrigger>
-                  <SheetContent side="left" className="w-48 bg-white border-gray-200 p-0">
-                    <SidebarContent
-                      pathname={pathname}
-                      onNavigate={handleNavigate}
-                    />
-                  </SheetContent>
-                </Sheet>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm font-bold italic">S</span>
-                </div>
-                <span className="text-lg font-bold text-gray-900">Saldo Certo</span>
-              </div>
-            </div>
-
-            {/* Center/Right: Top nav links */}
-            <nav className="hidden sm:flex items-center gap-6">
-              {topNavItems.map((item) => {
-                const isActive = pathname === item.href
-                return (
-                  <button
-                    key={item.href}
-                    onClick={() => handleNavigate(item.href)}
-                    className={`text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'text-blue-600'
-                        : 'text-gray-500 hover:text-gray-800'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                )
-              })}
-              <button
-                onClick={handleLogout}
-                className="text-sm font-medium text-gray-500 hover:text-red-500 transition-colors"
+        {/* Mobile Header only (hides on desktop) */}
+        <header className="lg:hidden sticky top-0 z-40 bg-white border-b border-gray-200">
+          <div className="flex items-center justify-between px-4 h-14">
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger
+                render={
+                  <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-800" />
+                }
               >
-                Sair
-              </button>
-            </nav>
+                <Menu className="w-5 h-5" />
+              </SheetTrigger>
+              <SheetContent side="left" className="w-48 bg-white border-gray-200 p-0">
+                <SidebarContent
+                  pathname={pathname}
+                  onNavigate={handleNavigate}
+                  onLogout={handleLogout}
+                />
+              </SheetContent>
+            </Sheet>
 
-            {/* Mobile: user icon */}
-            <div className="sm:hidden flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-gray-500">
-                <LogOut className="w-4 h-4" />
-              </Button>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold italic">S</span>
+              </div>
+              <span className="text-lg font-bold text-gray-900">Saldo Certo</span>
             </div>
+            
+            <div className="w-8 h-8" /> {/* Spacer */}
           </div>
         </header>
 

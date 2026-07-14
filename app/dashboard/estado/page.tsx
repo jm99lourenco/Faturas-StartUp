@@ -10,11 +10,18 @@ import {
   ArrowUpRight,
   TrendingUp,
   Calendar,
+  Calculator,
+  Info,
+  CheckCircle,
+  AlertTriangle
 } from 'lucide-react'
 
 export default function EstadoPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Accounting simulator state
+  const [regime, setRegime] = useState<'simplificado' | 'organizada'>('simplificado')
 
   const loadData = useCallback(async () => {
     if (DEMO_MODE) {
@@ -56,48 +63,64 @@ export default function EstadoPage() {
   }
 
   const incoming = invoices.filter((inv) => inv.direction === 'incoming')
+  const outgoing = invoices.filter((inv) => inv.direction === 'outgoing')
+  
+  const totalBaseIncome = incoming.reduce((sum, inv) => sum + Number(inv.base_amount), 0)
+  const totalExpenses = outgoing.reduce((sum, inv) => sum + Number(inv.total_amount), 0)
   const totalVat = incoming.reduce((sum, inv) => sum + Number(inv.vat_amount), 0)
   const totalWithholding = incoming.reduce((sum, inv) => sum + Number(inv.withholding_amount), 0)
-  const totalBaseIncome = incoming.reduce((sum, inv) => sum + Number(inv.base_amount), 0)
 
-  // Simplified Social Security calculation (approximately 21.4% of 70% of income for simplified regime)
-  const socialSecurityBase = totalBaseIncome * 0.7
-  const socialSecurityMonthly = socialSecurityBase > 0 ? Math.round((socialSecurityBase * 0.214) / 12 * 100) / 100 : 0
+  // Social Security: 21.4% rate over 70% of average quarterly base income
+  const quarterlyIncome = totalBaseIncome / 2 // simplified estimate
+  const ssBaseTributavel = quarterlyIncome * 0.7
+  const ssMonthlyContribution = ssBaseTributavel > 0 ? (ssBaseTributavel * 0.214) / 3 : 0
 
-  // Monthly IVA estimate (quarterly in practice, but shown monthly for simplicity)
-  const monthlyVat = totalVat > 0 ? Math.round((totalVat / 3) * 100) / 100 : 0
+  // VAT calculations
+  const monthlyVat = totalVat > 0 ? totalVat / 3 : 0
+
+  // IRS Simplified Regime: 75% coefficient of base income is taxed, 25% is assumed expense
+  const irsRendimentoTributavel = totalBaseIncome * 0.75
+  
+  // Expenses justification requirement (simplified rule: 15% of total base income must be justified with business expenses)
+  const expensesNeeded = totalBaseIncome * 0.15
+  const expensesJustifiedDiff = totalExpenses - expensesNeeded
+
+  // Estimate Tax bracket & IRS liability (Simplified Pt brackets)
+  let irsTaxRate = 0.145 // start bracket
+  if (totalBaseIncome > 7500 && totalBaseIncome <= 11284) irsTaxRate = 0.23
+  else if (totalBaseIncome > 11284 && totalBaseIncome <= 15992) irsTaxRate = 0.265
+  else if (totalBaseIncome > 15992) irsTaxRate = 0.285
+
+  const estimatedIrsTotal = irsRendimentoTributavel * irsTaxRate
+  const finalIrsToPayOrReceive = estimatedIrsTotal - totalWithholding
 
   const obligations = [
     {
-      label: 'IVA a Pagar (Mês)',
+      label: 'IVA Estimado (Mês)',
       value: monthlyVat,
-      description: 'Estimativa mensal baseada no trimestre',
+      description: 'Estimativa baseada nas faturas emitidas com IVA',
       icon: ArrowUpRight,
       color: 'text-blue-600',
       bg: 'bg-blue-50',
-      borderColor: 'border-blue-200',
     },
     {
       label: 'Segurança Social (Mês)',
-      value: socialSecurityMonthly,
-      description: 'Regime simplificado (21.4% de 70% do rendimento)',
+      value: ssMonthlyContribution,
+      description: 'Contribuição calculada sobre 70% do rendimento',
       icon: TrendingUp,
       color: 'text-blue-600',
       bg: 'bg-blue-50',
-      borderColor: 'border-blue-200',
     },
     {
-      label: 'Retenção na Fonte (Total)',
+      label: 'Retenções Acumuladas',
       value: totalWithholding,
-      description: 'Total retido pelos seus clientes',
+      description: 'Total retido na fonte pelos seus clientes',
       icon: ArrowDownLeft,
       color: 'text-green-600',
       bg: 'bg-green-50',
-      borderColor: 'border-green-200',
     },
   ]
 
-  // Monthly breakdown (simplified)
   const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
   const currentMonth = new Date().getMonth()
 
@@ -106,9 +129,9 @@ export default function EstadoPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Pagamentos ao Estado e Segurança Social</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Obrigações Fiscais & Contabilidade</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Resumo das suas obrigações fiscais e contribuições
+            Simulações de IRS, Segurança Social e obrigações AT
           </p>
         </div>
         <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-md shadow-blue-600/20">
@@ -116,65 +139,12 @@ export default function EstadoPage() {
         </div>
       </div>
 
-      {/* Obrigações Fiscais Mensais Chart Area */}
-      <Card className="bg-white border-gray-200 shadow-sm">
-        <CardContent className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">Obrigações Fiscais Mensais</h2>
-
-          {/* Visual Timeline */}
-          <div className="relative">
-            {/* SVG Timeline with dots and labels */}
-            <svg viewBox="0 0 800 200" className="w-full h-48" xmlns="http://www.w3.org/2000/svg">
-              {/* Grid lines */}
-              <line x1="50" y1="160" x2="750" y2="160" stroke="#e5e7eb" strokeWidth="1" />
-
-              {/* Green path (IVA) */}
-              <path
-                d="M80,140 C160,140 200,60 280,50 C360,40 400,120 480,130 C520,135 560,80 640,70 C680,65 720,85 740,80"
-                fill="none"
-                stroke="#22c55e"
-                strokeWidth="2.5"
-                strokeDasharray="6 4"
-                opacity="0.7"
-              />
-
-              {/* Blue path (Retenção) */}
-              <path
-                d="M80,120 C160,120 200,140 280,150 C360,160 400,100 480,80 C520,70 560,60 640,65 C680,68 720,75 740,70"
-                fill="none"
-                stroke="#4361ee"
-                strokeWidth="2.5"
-              />
-
-              {/* Dots on green path */}
-              <circle cx="80" cy="140" r="5" fill="#22c55e" />
-              <circle cx="280" cy="50" r="7" fill="#22c55e" />
-              <circle cx="480" cy="130" r="5" fill="#22c55e" />
-
-              {/* Dots on blue path */}
-              <circle cx="280" cy="150" r="5" fill="#4361ee" />
-              <circle cx="480" cy="80" r="7" fill="#4361ee" />
-              <circle cx="640" cy="65" r="7" fill="#4361ee" />
-              <circle cx="740" cy="70" r="5" fill="#4361ee" />
-
-              {/* Labels */}
-              <text x="60" y="175" className="text-xs" fill="#9ca3af">Pasta</text>
-              <text x="260" y="38" className="text-xs" fill="#22c55e" fontWeight="500">IVA</text>
-              <text x="430" y="175" className="text-xs" fill="#9ca3af">Seg. Social</text>
-              <text x="380" y="165" className="text-xs" fill="#4361ee" fontWeight="500">Retenção</text>
-              <text x="560" y="55" className="text-xs" fill="#9ca3af">Seg. Social</text>
-              <text x="620" y="55" className="text-xs" fill="#9ca3af">Retenção</text>
-            </svg>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Key Metrics */}
+      {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {obligations.map((item) => {
           const Icon = item.icon
           return (
-            <Card key={item.label} className={`bg-white border-gray-200 shadow-sm`}>
+            <Card key={item.label} className="bg-white border-gray-200 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center`}>
@@ -192,10 +162,133 @@ export default function EstadoPage() {
         })}
       </div>
 
-      {/* Previsão de Pagamentos */}
+      {/* Accounting Simulator Section */}
+      <Card className="bg-white border-gray-200 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-150 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Calculator className="w-5 h-5 text-blue-600" />
+            <h2 className="text-lg font-bold text-gray-900">Simulador de Contabilidade AT</h2>
+          </div>
+          
+          <div className="flex bg-gray-100 p-1 rounded-xl">
+            <button
+              onClick={() => setRegime('simplificado')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                regime === 'simplificado' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'
+              }`}
+            >
+              Regime Simplificado
+            </button>
+            <button
+              onClick={() => setRegime('organizada')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                regime === 'organizada' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'
+              }`}
+            >
+              Contabilidade Organizada
+            </button>
+          </div>
+        </div>
+
+        <CardContent className="p-6">
+          {regime === 'simplificado' ? (
+            <div className="space-y-6 animate-fade-in">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Math breakdown table */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">Cálculo de Rendimento Tributável</h3>
+                  
+                  <div className="divide-y divide-gray-100 space-y-3">
+                    <div className="flex justify-between text-sm pt-2">
+                      <span className="text-gray-500">Rendimento Bruto Total</span>
+                      <span className="font-semibold text-gray-900 font-mono">€{formatCurrency(totalBaseIncome)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm pt-3">
+                      <span className="text-gray-500">Coeficiente Aplicado (75%)</span>
+                      <span className="font-semibold text-blue-600 font-mono">€{formatCurrency(irsRendimentoTributavel)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm pt-3">
+                      <span className="text-gray-500">Escalão de IRS Estimado</span>
+                      <span className="font-semibold text-gray-900 font-mono">{irsTaxRate * 100}%</span>
+                    </div>
+                    <div className="flex justify-between text-sm pt-3 border-t border-gray-200">
+                      <span className="text-gray-900 font-medium">IRS Bruto Estimado</span>
+                      <span className="font-bold text-gray-900 font-mono">€{formatCurrency(estimatedIrsTotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm pt-3">
+                      <span className="text-gray-500">Menos Retenção na Fonte</span>
+                      <span className="font-semibold text-red-500 font-mono">- €{formatCurrency(totalWithholding)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm pt-3 border-t-2 border-gray-200">
+                      <span className="text-gray-900 font-bold">IRS Final Estimado (a pagar/receber)</span>
+                      <span className={`font-extrabold font-mono text-lg ${finalIrsToPayOrReceive > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        {finalIrsToPayOrReceive > 0 ? `€${formatCurrency(finalIrsToPayOrReceive)}` : `- €${formatCurrency(Math.abs(finalIrsToPayOrReceive))}`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Justification of expenses rules */}
+                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Info className="w-5 h-5 text-blue-500" />
+                      <h4 className="text-sm font-bold text-gray-900">Justificação de Despesas (Regra dos 15%)</h4>
+                    </div>
+                    <p className="text-xs text-gray-500 leading-relaxed mb-4">
+                      No regime simplificado, o Estado exige que justifique despesas de atividade de pelo menos 15% do seu rendimento para ter direito à dedução total automática de 25%.
+                    </p>
+                    
+                    <div className="space-y-3 mt-4 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Mínimo Necessário (15%):</span>
+                        <span className="font-bold text-gray-800 font-mono">€{formatCurrency(expensesNeeded)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Despesas Apresentadas:</span>
+                        <span className="font-bold text-gray-800 font-mono">€{formatCurrency(totalExpenses)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    {expensesJustifiedDiff >= 0 ? (
+                      <div className="flex items-start gap-2 text-green-700 bg-green-50 p-3 rounded-xl">
+                        <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                        <span className="text-xs font-medium">Atividade Segura! As suas despesas justificadas cobrem o mínimo exigido pela AT.</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-start gap-2 text-amber-700 bg-amber-50 p-3 rounded-xl">
+                        <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+                        <span className="text-xs font-medium">Atenção! Faltam justificar €{formatCurrency(Math.abs(expensesJustifiedDiff))} de despesas de atividade no E-Fatura para evitar penalização de IRS.</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6 animate-fade-in text-center py-8">
+              <Calculator className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-sm font-semibold text-gray-800">Simulador de Contabilidade Organizada</p>
+              <p className="text-xs text-gray-400 max-w-md mx-auto leading-relaxed">
+                Este regime exige um Contabilista Certificado (TOC). Os seus lucros tributáveis são calculados com base no lucro real liquido (Rendimentos - Despesas justificadas de atividade).
+              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 max-w-sm mx-auto text-xs text-blue-800 mt-4 text-left">
+                <span className="font-bold block mb-1">Simulação rápida de Lucro Real:</span>
+                <span className="block">Rendimento bruto: €{formatCurrency(totalBaseIncome)}</span>
+                <span className="block">Despesas reais: €{formatCurrency(totalExpenses)}</span>
+                <span className="font-bold block mt-2">Lucro líquido tributável: €{formatCurrency(Math.max(0, totalBaseIncome - totalExpenses))}</span>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Payment Timetable */}
       <Card className="bg-white border-gray-200 shadow-sm">
         <CardContent className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Previsão de Pagamentos</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Previsão de Pagamentos fiscais</h2>
           <div className="grid grid-cols-6 md:grid-cols-12 gap-2">
             {months.map((month, i) => {
               const isPast = i < currentMonth

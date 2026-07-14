@@ -6,12 +6,14 @@ import { calculateLiquiditySplit, generateTaxAlerts, formatCurrency } from '@/li
 import LiquiditySplitter from '@/components/LiquiditySplitter'
 import TaxAlerts from '@/components/TaxAlerts'
 import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import {
   ArrowDownLeft,
   ArrowUpRight,
   Landmark,
   Receipt,
   FileText,
+  Plus
 } from 'lucide-react'
 import Link from 'next/link'
 import { DEMO_MODE, DEMO_INVOICES, DEMO_PROFILE } from '@/lib/demo-data'
@@ -65,6 +67,17 @@ export default function DashboardPage() {
   const alerts = profile ? generateTaxAlerts(invoices, profile) : []
   const recentInvoices = invoices.slice(0, 5)
 
+  // Simulated points for the Fluxo de Caixa Mensal SVG Line Chart (matching layout)
+  const chartPoints = [
+    { x: 50, y: 170, label: 'Jan' },
+    { x: 150, y: 160, label: 'Fev' },
+    { x: 250, y: 155, label: 'Mar' },
+    { x: 350, y: 140, label: 'Abr' },
+    { x: 450, y: 110, label: 'Mai' },
+    { x: 550, y: 90, label: 'Jun' },
+    { x: 650, y: 70, label: 'Jul' },
+  ]
+
   const summaryCards = [
     {
       label: 'Total Recebido',
@@ -99,13 +112,18 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Bem-vindo{profile?.business_name ? `, ${profile.business_name}` : ''}
-        </h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Resumo das suas finanças
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Bem-vindo{profile?.business_name ? `, ${profile.business_name}` : ''}
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Resumo das suas finanças
+          </p>
+        </div>
+        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-md shadow-blue-600/20">
+          <span className="text-white text-xl font-bold italic">S</span>
+        </div>
       </div>
 
       {/* Tax Alerts */}
@@ -113,6 +131,52 @@ export default function DashboardPage() {
 
       {/* Liquidity Splitter — Hero */}
       <LiquiditySplitter split={split} />
+
+      {/* Monthly Cash Flow Chart with Manual Input Button Row */}
+      <Card className="bg-white border-gray-200 shadow-sm p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Fluxo de Caixa Mensal</h2>
+            <p className="text-xs text-gray-400">Rendimentos acumulados vs despesas justificadas</p>
+          </div>
+          <Link href="/dashboard/faturas">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold h-11 px-6 rounded-xl shadow-md shadow-blue-600/20 gap-2 w-full sm:w-auto">
+              <Plus className="w-4 h-4" /> Adicionar Entrada Manual
+            </Button>
+          </Link>
+        </div>
+
+        {/* SVG Line Chart */}
+        <div className="relative">
+          <svg viewBox="0 0 700 200" className="w-full h-44" xmlns="http://www.w3.org/2000/svg">
+            {/* Grid horizontal lines */}
+            <line x1="30" y1="40" x2="670" y2="40" stroke="#f1f5f9" strokeWidth="1" />
+            <line x1="30" y1="100" x2="670" y2="100" stroke="#f1f5f9" strokeWidth="1" />
+            <line x1="30" y1="160" x2="670" y2="160" stroke="#e2e8f0" strokeWidth="1.5" />
+
+            {/* X Labels */}
+            {chartPoints.map((pt, i) => (
+              <text key={i} x={pt.x} y="180" className="text-[10px]" fill="#94a3b8" textAnchor="middle">
+                {pt.label}
+              </text>
+            ))}
+
+            {/* Curve path (Line chart) */}
+            <path
+              d="M50,170 C100,165 150,160 250,155 C350,140 450,110 550,90 C600,80 650,70 650,70"
+              fill="none"
+              stroke="#4361ee"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+
+            {/* Chart dots */}
+            {chartPoints.map((pt, i) => (
+              <circle key={i} cx={pt.x} cy={pt.y} r="4" fill="#4361ee" />
+            ))}
+          </svg>
+        </div>
+      </Card>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -168,17 +232,9 @@ export default function DashboardPage() {
                 <div key={invoice.id} className="flex items-center justify-between px-5 py-4 hover:bg-gray-50/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                        invoice.direction === 'incoming'
-                          ? 'bg-green-50'
-                          : 'bg-red-50'
-                      }`}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center bg-green-50"
                     >
-                      {invoice.direction === 'incoming' ? (
-                        <ArrowDownLeft className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <ArrowUpRight className="w-4 h-4 text-red-500" />
-                      )}
+                      <ArrowDownLeft className="w-4 h-4 text-green-600" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">
@@ -190,14 +246,9 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <p
-                    className={`text-sm font-semibold font-mono ${
-                      invoice.direction === 'incoming'
-                        ? 'text-green-600'
-                        : 'text-red-500'
-                    }`}
+                    className="text-sm font-semibold font-mono text-green-600"
                   >
-                    {invoice.direction === 'incoming' ? '+' : '-'}€
-                    {formatCurrency(Number(invoice.total_amount))}
+                    +€{formatCurrency(Number(invoice.total_amount))}
                   </p>
                 </div>
               ))}
